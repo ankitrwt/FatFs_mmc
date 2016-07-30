@@ -1,0 +1,783 @@
+
+;	SD Memory Card Interface
+;	6/08 Luhan Monat
+;	
+;	This device translates serial data to and from an SD
+;	memory card.
+	
+	
+	device	PIC16F819,pwrte_on,hs_osc,mclre_on
+
+
+	org	20h
+
+flag	ds	1
+bump	ds	1
+cstat	ds	1		;card status flag
+timer	ds	1
+temp	ds	1
+count	ds	2
+loops	ds	1
+data	ds	1
+xsave	ds	1
+sdtag	ds	1
+sbc1	ds	1
+sbc2	ds	1
+value	ds	1
+addr	ds	2
+texx	ds	1
+thi	ds	1
+tlow	ds	1
+hdata	ds	1
+sbc	ds	1
+sbuff	ds	40
+ppnt	ds	1
+txspi	ds	1
+rxspi	ds	1
+exx	ds	1
+hi	ds	1
+low	ds	1
+tmp1	ds	1
+btemp	ds	1
+scnt	ds	1
+
+del0	ds	1
+del1	ds	1
+del2	ds	1
+
+SOUT	=	ra.1
+SINP	=	ra.2
+NSEL	=	rb.3		;/cs on sd card
+
+BUG	=	rb.0
+
+BREAK	=	flag.0
+ECHO	=	flag.1
+ASC	=	flag.2
+
+BUSY	=	cstat.0		;card is not ready
+NEXT	=	cstat.1		;next sector
+
+; SD Card commands
+
+SDSPI	=	0+40h		;set SPI mode
+SDINI	=	1+40h		;init card
+SDSTOP	=	12+40h		;stop multi sector read
+SDRDS	=	17+40h		;read single sector
+SDRDM	=	18+40h		;read multiple sectors
+SDWRS	=	24+40h		;write single sector
+SDWRM	=	25+40h		;write multiple sectors
+SWTAG	=	0FEh		;write single sector tag
+MWTAG	=	0FCh		;write multi sector tag
+STPTAG	=	0FDh		;stop multi write tag
+
+
+	org	0
+
+	goto	start
+
+; print strings selected by stuffing Wreg with address
+	
+pstr	clrf	PCLATH
+	movwf	PCL
+rdstr	retw	13,10,'SD-Card>',0
+opstr	retw	' Open',0
+wrstr	retw	' Write',0
+clstr	retw	' Close',0
+abstr	retw	' - abort',0
+
+; scan this list for available commands
+
+cmds	clrf	PCLATH
+	addwf	PCL
+	retw	13
+	goto	cycle		;end of line.
+	retw	' '
+	goto	cyc2		;skip any spaces
+	retw	'W'
+	goto	sdwrite		;write hex bytes
+	retw	'R'
+	goto	sdread		;read hex bytes
+	retw	'A'
+	goto	adump		;read ascii bytes
+	retw	'Z'
+	goto	zinit		;send clock pulses
+	retw	'S'
+	goto	select		;select card
+	retw	'U'
+	goto	desel		;deselect card
+	retw	'C'
+	goto	docom		;do basic command
+	retw	'X'
+	goto	xmit		;send repeated bytes
+	retw	'T'
+	call	test
+	retw	'?'
+	call	t24bit
+	retw	0		;end of list
+	
+
+
+start	bsf	RP0
+	movlw	00000100b	;
+	movwf	TRISA
+	movlw	00000010b	;
+	movwf	TRISB
+	movlw	6		;analog enables
+	movwf	ADCON1		;6=none 0=0-4 0E=1 4=0,1,3
+	movlw	70h
+	movwf	OSCCON		;8mhz
+	movlw	2		;tweek internal os
+	movwf	OSCTUNE		;0=center(d) 1F=max 20=min
+	bcf	RP0
+	movlw	0		;timer 2
+	movwf	T2CON		;0=off 4=on
+	clrf	addr
+	clrf	addr+1
+	call	sspinit		;init the SPI port
+
+
+cycle	call	desel
+	btfsc	SINP		;wait for valid rs232
+	goto	cycle		;(end of break signal)
+	movlw	rdstr
+	call	print		;print command prompt
+	bsf	ECHO		;echo typed characters
+	call	filbuf		;get command buffer
+cyc2	call	getbuf		;next char from buffer
+	movwf	temp
+	clrf	count		;index for 1st command
+:nxt	movf	count,w
+	call	cmds		;try next command
+	xorlw	0		;set z flag?
+	btfsc	z
+	goto	error		;end marker hit.
+	xorwf	temp,w		;match?
+	btfsc	z
+	goto	:hit		;we got a match.
+	incf	count		;skip over -
+	incf	count		; next entry.
+	goto	:nxt		;try next one
+:hit	incf	count		;point to vector
+	movf	count,w
+	call	cmds		;do the jump
+	goto	cyc2		;back here on return.
+
+abort	call	desel
+	movlw	abstr
+	call	print
+	goto	cycle	
+
+error	movlw	' '
+	call	serout
+	movlw	'?'
+	call	serout
+	goto	cycle
+
+
+
+test	call	getdec
+	movwf	bump
+	movlw	opstr
+	call	print
+	clrf	addr
+	clrf	addr+1 		;initial address
+	call	sdwo
+	btfsc	c
+	ret
+	movlw	wrstr
+	call	print
+	clrf	value
+	movlw	7
+	movwf	loops
+:wr	movf	value,w
+	call	sdwr		;write a byte
+	movf	bump,w
+	addwf	value
+	movf	value,w
+	xorlw	44h		;arbitrary value
+	btfss	z
+	goto	:wr
+	decfsz	loops
+	goto	:wr
+	movlw	clstr
+	call	print
+	call	sdwc
+	btfsc	c
+	ret
+	movlw	abstr
+	call	print
+	ret
+
+
+; ***** file operations *****
+
+; open SD file at sector in ADDR
+; set CY on error.
+
+sdwo	call	select		;activate select line
+	movlw	SDWRM		;write multi sector
+	call	sspio
+	call	sdaddr		;send sector address
+	call	sdstat		;read status
+	bsf	c		;assume error
+	xorlw	0		;was it zero?
+	btfss	z		;yes, skip next
+	ret			;return error
+	call	sdrwd		;clear count.
+	bsf	NEXT		;flag for new sector
+	bcf	c
+	ret
+	
+; write a byte to SD Card
+; handle opening consecutive sectors
+; set CY on error.
+
+sdwr	movwf	data
+	btfss	NEXT
+	goto	:ok
+	movlw	MWTAG
+	call	sspio		;write the tag
+	bcf	NEXT		;clear 'next sector' flag
+	movf	data,w
+:ok	call	sspio		;write data byte
+	bcf	c		;assume no error
+	decfsz	sbc1		;primary counter
+	ret			;no error
+	decfsz	sbc2		;secondary counter
+	ret			;no error
+	call	ssprd		;write ff as crc
+	call	ssprd		;write ff as crc
+	bsf	NEXT		;flag new sector
+	incf	addr		;bump sector number
+	btfsc	z		;rollover?
+	incf	addr+1
+:wait	call	ssprd		;wait for status
+	xorlw	0FFh
+	btfsc	z		;wait for data busy status
+	goto	:wait
+:rdy	call	ssprd		;get status
+	xorlw	0FFh		;no more busy?
+	btfss	z
+	goto	:rdy		;wait for it
+	call	sdrwd		;rewind count
+	ret
+
+; close SD file, CY on error
+
+sdwc	btfsc	NEXT		;new sector?
+	goto	:end		;yes
+	movlw	0ffh		;write to current sector
+	call	sdwr		;
+	goto	sdwc		;until end
+:end	movlw	STPTAG		;write stop tag
+	call	sspio
+	call	sdstat		;checks status
+	call	hexout
+	call	sdstat
+	call	hexout
+	bcf	c
+	call	desel
+	ret
+
+; send multiwrite tag and clear the byte counters			
+	
+sdrwd	movlw	0		;set up 2 byte counter
+	movwf	sbc1		;256 counts
+	movlw	2		;do it twice
+	movwf	sbc2		;256 * 2 = 512
+	ret
+
+
+; read card status (first non-FF value)
+	
+sdstat	movlw	250		;set max count
+	movwf	del0
+:2	call	ssprd		;read card
+	xorlw	0ffh		;any data?
+	btfss	z		;match ff?
+	goto	:4
+	decfsz	del0		;retry?
+	goto	:2		;yes - try agian
+:4	xorlw	0ffh		;return original value
+	ret
+
+
+
+; ***** basic access operations *****	
+
+select	bcf	NSEL
+	ret
+
+desel	bsf	NSEL
+	ret
+	
+; send a bunch of clock bursts
+
+zinit	call	getdec
+	movwf	count
+:2	movlw	0FFh
+	call	sspio
+	decfsz	count
+	goto	:2
+	ret
+
+
+; write a series of hex valuses separated by spaces
+	
+sdwrite	call	crlf
+	call	select
+:2	call	getbuf
+	xorlw	' '
+	btfss	z
+	goto	:end
+	call	hexin
+	btfsc	c
+	goto	error
+	call	sspio
+	call	hexout
+	goto	:2
+:end	call	desel
+	ret
+
+; read and dump number of hex or ascii bytes
+
+sdread	bcf	ASC
+	goto	sdrgo
+adump	bsf	ASC
+sdrgo	call	crlf
+	call	getdec
+	movf	hi,w
+	movwf	count+1
+	movf	low,w
+	movwf	count
+	call	select
+:2	btfsc	SINP
+	goto	abort		;abort on break
+	movlw	0FFh
+	call	sspio
+	btfss	ASC
+	call	hexout
+	btfsc	ASC
+	call	ascout
+	movlw	-1
+	addwf	count
+	btfss	c
+	addwf	count+1
+	movf	count+1,w
+	iorwf	count,w
+	btfss	z
+	goto	:2
+:4	call	desel
+	ret
+
+
+; format: command 0-63, sector 0-65535
+; create address by multiplying sector number by 512.
+
+docom	call	crlf
+	call	select
+	call	getdec		;get 6 bit command
+	addlw	40h		;all commands start w/01
+	call	sspio		;send command.
+	call	getdec		;now get address
+	movf	hi,w
+	movwf	addr+1
+	movf	low,w
+	movwf	addr
+	call	sdaddr		;send address and crc
+	call	desel
+	ret
+
+; send address in ADDR as sector address
+
+sdaddr	movf	addr+1,w
+	movwf	hi
+	movf	addr,w
+	movwf	low
+	call	double		;times 2.
+	movf	exx,w
+	call	sspio		;then times 256 by byte offset.
+	movf	hi,w
+	call	sspio
+	movf	low,w
+	call	sspio
+	movlw	0		;low byte always zero.
+	call	sspio
+	movlw	95h		;specific chechsum for Command 0.
+	call	sspio
+	ret
+
+	
+xmit	call	crlf
+	call	getdec
+	movwf	count
+	call	hexin
+	movwf	value
+	call	select
+:2	movf	value,w
+	call	sspio
+	decfsz	count
+	goto	:2
+	call	desel
+	ret
+
+
+
+; print string at location 'w'
+
+print	movwf	ppnt
+:2	movf	ppnt,w
+	call	pstr
+	xorlw	0
+	btfsc	z
+	ret
+	call	serout
+	incf	ppnt
+	goto	:2
+
+
+; double 16 bit into 17 bit value
+
+double	bcf	c
+	rlf	low
+	rlf	hi
+	rlf	exx
+	ret
+
+
+t24bit	call	getdec
+	movf	exx,w
+	call	hexout
+	movf	hi,w
+	call	hexout
+	movf	low,w
+	call	hexout
+	ret
+
+
+
+; convert ascii input data to binary in exx/hi/low
+
+getdec	clrf	exx
+	clrf	hi
+	clrf	low
+:next	call	getbuf		;next char
+	movwf	temp
+	movlw	'0'
+	subwf	temp
+	btfss	c		;underflow ?
+	goto	:done		;yes
+	movlw	10
+	subwf	temp,w		;over 9
+	btfsc	c		;
+	goto	:done		;yes.
+	call	x10		;old value times ten
+	movf	temp,w		;get binary value
+	addwf	low		;add to value
+	btfss	c
+	goto	:next		;no carry
+	movlw	1
+	addwf	hi		;add 1 to hi
+	btfss	c		;carry?
+	goto	:next		;no.
+	incf	exx		;yes, bump exx
+	goto	:next
+:done	movf	low,w
+	ret
+
+; fast x 10 multiply of hi/low
+
+x10	bcf	c		;clear cy
+	rlf	low
+	rlf	hi		; x 2
+	rlf	exx
+	movf	low,w
+	movwf	tlow
+	movf	hi,w
+	movwf	thi		;save the x 2
+	movf	exx,w
+	movwf	texx
+	bcf	c
+	rlf	low
+	rlf	hi		; x 4
+	rlf	exx
+	bcf	c
+	rlf	low
+	rlf	hi		; x 8
+	rlf	exx
+	movf	tlow,w
+	addwf	low		; 8 + 2 = 10
+	movf	thi,w
+	btfsc	c
+	incfsz	thi,w
+	addwf	hi
+	movf	texx,w
+	btfsc	c
+	incfsz	texx,w
+	addwf	exx
+	ret
+
+
+
+; ascii hexidecimal I/O, cy = error
+
+
+hexin	clrf	hdata
+	call	gnib		;get first nibble
+	btfsc	c
+	ret			;cy = error
+	movwf	hdata
+	swapf	hdata
+	call	gnib
+	btfsc	c
+	ret
+	addwf	hdata,w
+	bcf	c		;data ok.
+	ret
+	
+	
+gnib	call	getbuf		;next char from buffer
+	btfsc	c		;valid over 30h
+	ret			;cy = error
+	addlw	-41h
+	btfss	c
+	addlw	7
+	addlw	10
+	bcf	c
+	ret
+
+
+; output 'w' as hex digit
+
+hexout	movwf	hdata
+	movlw	' '
+	call	serout
+	swapf	hdata,w		;get hi nibble
+	call	pnib
+	movf	hdata,w	
+
+pnib	andlw	0fh		;isolate
+	addlw	-10
+	btfsc	c
+	addlw	7
+	addlw	3Ah
+	goto	serout
+
+
+crlf	movlw	13
+	call	serout
+	movlw	10
+	call	serout
+	movlw	50
+	call	delay
+	ret
+
+ascout	addlw	-20h
+	btfss	c
+	movlw	0
+	addlw	20h
+	goto	serout
+
+
+
+; Fill command buffer w/ backspace processing
+
+filbuf	clrf	sbc		;serial buffer counter	
+:more	call	serin		;get char
+	xorlw	3		;^C ??
+	btfsc	z
+	goto	:cr		;replay same line
+	xorlw	3		;fix it back.
+	call	ucase		;all upper case
+	movwf	btemp
+	xorlw	10
+	btfsc	z
+	goto	:more		;eat linefeeds.
+	movf	btemp,w
+	xorlw	8		;backspace?
+	btfsc	z
+	goto	:bs		;yes.
+	movf	sbc,w
+	addlw	sbuff
+	movwf	FSR
+	movf	btemp,w
+	movwf	INDER		;store it
+	btfsc	ECHO
+	movf	btemp,w
+	xorlw	13		;return?
+	btfsc	z
+	goto	:cr		;yes.
+	movf	btemp,w
+	call	serout
+	incf	sbc
+	movf	sbc,w
+	xorlw	39
+	btfsc	z
+	goto	:end		;end of buffer
+	goto	:more
+:bs	decf	sbc
+	btfsc	sbc,7
+	goto	filbuf		;hit start of buffer
+	movlw	8
+	call	serout
+	movlw	' '		;forspace
+	call	serout
+	movlw	8
+	call	serout
+	goto	:more
+:end	movlw	8		;another backspace
+	call	serout
+	decf	sbc
+	goto	:more
+:cr	clrf	sbc
+	ret
+
+
+; read buffer cy on error
+
+getbuf	movf	sbc,w
+	addlw	sbuff
+	movwf	FSR
+	movf	INDER,w
+	incf	sbc
+	xorlw	13		;end of line
+	btfsc	z
+	decf	sbc		;stay there.
+	xorlw	13
+	movwf	temp
+	sublw	2fh		;set carry on non alphanumeric
+	movf	temp,w
+	ret
+
+; back up buffer pointer
+
+decbuf	decf	sbc
+	ret
+
+; change w-reg to upper case
+
+ucase	addlw	-61H
+	btfss	c
+	goto	:5
+	addlw	-26
+	btfsc	c
+	addlw	20h
+	addlw	41h+26
+	ret
+:5	addlw	61h
+	ret
+
+
+; send out data in 'w' as ttl-true
+; put 'stop bits' at start for quick return
+
+serout	movwf	temp
+	clrf	scnt
+	bsf	scnt,3
+	movlw	10
+	call	delay		;add pacing delay
+	call	fbit
+	bcf	SOUT		;start bit
+	call	fbit
+	nop
+	nop
+	nop
+	nop
+:s2	nop
+	rrf	temp
+	btfss	c
+	bcf	SOUT
+	btfsc	c
+	bsf	SOUT
+	call	fbit
+	decfsz	scnt
+	goto	:s2
+	bsf	SOUT		;stop bit
+	ret
+
+
+; inverted serial input
+; 115k baud = 8.7 usec per bit.
+
+serin	clrf	scnt
+	bsf	scnt,3		;set count=8
+	clrf	temp
+:s1	btfss	SINP
+	goto	:s1
+	call	hbit		;half bit time
+	btfss	SINP
+	goto	serin		;false start bit
+:s2	call	fbit		;full bit time
+	bcf	c
+	btfss	SINP
+	bsf	c
+	rrf	temp
+	nop
+	nop
+	decfsz	scnt
+	goto	:s2
+	call	fbit		;move into stop bit loc
+	movf	temp,w
+	ret
+
+	
+fbit	movlw	10
+	movwf	del0
+:f2	decfsz	del0
+	goto	:f2
+	ret
+	
+hbit	movlw	4
+	movwf	del0
+:f2	decfsz	del0
+	goto	:f2
+	ret
+	
+
+; ***** SPI serial interface *****
+
+sspinit	bsf	RP0
+	movlw	11000000b	;1100000(kodak,sandisk)
+	movwf	SSPSTAT
+	bcf	RP0
+	movlw	00110000b	;0011000(kodak,sandisk)
+	movwf	SSPCON
+	ret
+
+
+; send out spi data and recieve spi data
+
+ssprd	movlw	0FFh		;send FF for read only
+sspio	movwf	SSPBUF		;send data
+	bsf	RP0
+:2	btfss	BF		;wait for
+	goto	:2		;ready.
+	bcf	RP0
+	movf	SSPBUF,w	;read data
+	ret
+
+debug	call	hexout
+	movlw	50
+	call	delay
+	movlw	0
+	ret
+
+
+
+; qubic delay function
+
+delay	movwf	del2
+:x2	movwf	del1
+:x1	movwf	del0
+:x0	decfsz	del0
+	goto	:x0
+	decfsz	del1
+	goto	:x1
+	decfsz	del2
+	goto	:x2
+	ret
+
+	end
+QED
+   c —   c s                  

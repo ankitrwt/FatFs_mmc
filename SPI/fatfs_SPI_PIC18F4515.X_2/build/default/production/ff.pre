@@ -1,0 +1,3176 @@
+
+# 1 "ff.c"
+
+# 16 "integer.h"
+typedef int INT;
+typedef unsigned int UINT;
+
+
+typedef char CHAR;
+typedef unsigned char UCHAR;
+typedef unsigned char BYTE;
+
+
+typedef short SHORT;
+typedef unsigned short USHORT;
+typedef unsigned short WORD;
+typedef unsigned short WCHAR;
+
+
+typedef long LONG;
+typedef unsigned long ULONG;
+typedef unsigned long DWORD;
+
+# 67 "ff.h"
+typedef char TCHAR;
+
+# 78
+typedef struct {
+BYTE fs_type;
+BYTE drv;
+BYTE csize;
+BYTE n_fats;
+BYTE wflag;
+BYTE fsi_flag;
+WORD id;
+WORD n_rootdir;
+
+# 94
+DWORD last_clust;
+DWORD free_clust;
+
+
+DWORD cdir;
+
+DWORD n_fatent;
+DWORD fsize;
+DWORD volbase;
+DWORD fatbase;
+DWORD dirbase;
+DWORD database;
+DWORD winsect;
+BYTE win[512];
+} FATFS;
+
+# 114
+typedef struct {
+FATFS* fs;
+WORD id;
+BYTE flag;
+BYTE err;
+DWORD fptr;
+DWORD fsize;
+DWORD sclust;
+DWORD clust;
+DWORD dsect;
+
+DWORD dir_sect;
+BYTE* dir_ptr;
+
+
+DWORD* cltbl;
+
+# 137
+} FIL;
+
+# 143
+typedef struct {
+FATFS* fs;
+WORD id;
+WORD index;
+DWORD sclust;
+DWORD clust;
+DWORD sect;
+BYTE* dir;
+BYTE* fn;
+
+# 160
+const TCHAR* pat;
+
+} DIR;
+
+# 168
+typedef struct {
+DWORD fsize;
+WORD fdate;
+WORD ftime;
+BYTE fattrib;
+TCHAR fname[13];
+
+# 178
+} FILINFO;
+
+# 184
+typedef enum {
+FR_OK = 0,
+FR_DISK_ERR,
+FR_INT_ERR,
+FR_NOT_READY,
+FR_NO_FILE,
+FR_NO_PATH,
+FR_INVALID_NAME,
+FR_DENIED,
+FR_EXIST,
+FR_INVALID_OBJECT,
+FR_WRITE_PROTECTED,
+FR_INVALID_DRIVE,
+FR_NOT_ENABLED,
+FR_NO_FILESYSTEM,
+FR_MKFS_ABORTED,
+FR_TIMEOUT,
+FR_LOCKED,
+FR_NOT_ENOUGH_CORE,
+FR_TOO_MANY_OPEN_FILES,
+FR_INVALID_PARAMETER
+} FRESULT;
+
+# 212
+FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);
+FRESULT f_close (FIL* fp);
+FRESULT f_read (FIL* fp, void* buff, UINT btr, UINT* br);
+FRESULT f_write (FIL* fp, const void* buff, UINT btw, UINT* bw);
+FRESULT f_forward (FIL* fp, UINT(*func)(const BYTE*,UINT), UINT btf, UINT* bf);
+FRESULT f_lseek (FIL* fp, DWORD ofs);
+FRESULT f_truncate (FIL* fp);
+FRESULT f_sync (FIL* fp);
+FRESULT f_opendir (DIR* dp, const TCHAR* path);
+FRESULT f_closedir (DIR* dp);
+FRESULT f_readdir (DIR* dp, FILINFO* fno);
+FRESULT f_findfirst (DIR* dp, FILINFO* fno, const TCHAR* path, const TCHAR* pattern);
+FRESULT f_findnext (DIR* dp, FILINFO* fno);
+FRESULT f_mkdir (const TCHAR* path);
+FRESULT f_unlink (const TCHAR* path);
+FRESULT f_rename (const TCHAR* path_old, const TCHAR* path_new);
+FRESULT f_stat (const TCHAR* path, FILINFO* fno);
+FRESULT f_chmod (const TCHAR* path, BYTE attr, BYTE mask);
+FRESULT f_utime (const TCHAR* path, const FILINFO* fno);
+FRESULT f_chdir (const TCHAR* path);
+FRESULT f_chdrive (const TCHAR* path);
+FRESULT f_getcwd (TCHAR* buff, UINT len);
+FRESULT f_getfree (const TCHAR* path, DWORD* nclst, FATFS** fatfs);
+FRESULT f_getlabel (const TCHAR* path, TCHAR* label, DWORD* vsn);
+FRESULT f_setlabel (const TCHAR* label);
+FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt);
+FRESULT f_mkfs (const TCHAR* path, BYTE sfd, UINT au);
+FRESULT f_fdisk (BYTE pdrv, const DWORD szt[], void* work);
+int f_putc (TCHAR c, FIL* fp);
+int f_puts (const TCHAR* str, FIL* cp);
+int f_printf (FIL* fp, const TCHAR* str, ...);
+TCHAR* f_gets (TCHAR* buff, int len, FIL* fp);
+
+# 264
+DWORD get_fattime (void);
+
+# 16 "diskio.h"
+typedef BYTE DSTATUS;
+
+
+typedef enum {
+RES_OK = 0,
+RES_ERROR,
+RES_WRPRT,
+RES_NOTRDY,
+RES_PARERR
+} DRESULT;
+
+# 32
+DSTATUS disk_initialize (BYTE pdrv);
+DSTATUS disk_status (BYTE pdrv);
+DRESULT disk_read (BYTE pdrv, BYTE* buff, DWORD sector, UINT count);
+DRESULT disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, UINT count);
+DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
+
+# 448 "ff.c"
+static FATFS *FatFs[5];
+static WORD Fsid;
+
+
+static BYTE CurrVol;
+
+# 549
+static
+void mem_cpy (void* dst, const void* src, UINT cnt) {
+BYTE *d = (BYTE*)dst;
+const BYTE *s = (const BYTE*)src;
+
+# 561
+while (cnt--)
+*d++ = *s++;
+}
+
+
+static
+void mem_set (void* dst, int val, UINT cnt) {
+BYTE *d = (BYTE*)dst;
+
+while (cnt--)
+*d++ = (BYTE)val;
+}
+
+
+static
+int mem_cmp (const void* dst, const void* src, UINT cnt) {
+const BYTE *d = (const BYTE *)dst, *s = (const BYTE *)src;
+int r = 0;
+
+while (cnt-- && (r = *d++ - *s++) == 0) ;
+return r;
+}
+
+
+static
+int chk_chr (const char* str, int chr) {
+while (*str && *str != chr) str++;
+return *str;
+}
+
+# 742
+static
+FRESULT sync_window (
+FATFS* fs
+)
+{
+DWORD wsect;
+UINT nf;
+FRESULT res = FR_OK;
+
+
+if (fs->wflag) {
+wsect = fs->winsect;
+if (disk_write(fs->drv, fs->win, wsect, 1) != RES_OK) {
+res = FR_DISK_ERR;
+} else {
+fs->wflag = 0;
+if (wsect - fs->fatbase < fs->fsize) {
+for (nf = fs->n_fats; nf >= 2; nf--) {
+wsect += fs->fsize;
+disk_write(fs->drv, fs->win, wsect, 1);
+}
+}
+}
+}
+return res;
+}
+
+
+
+static
+FRESULT move_window (
+FATFS* fs,
+DWORD sector
+)
+{
+FRESULT res = FR_OK;
+
+
+if (sector != fs->winsect) {
+
+res = sync_window(fs);
+
+if (res == FR_OK) {
+if (disk_read(fs->drv, fs->win, sector, 1) != RES_OK) {
+sector = 0xFFFFFFFF;
+res = FR_DISK_ERR;
+}
+fs->winsect = sector;
+}
+}
+return res;
+}
+
+# 802
+static
+FRESULT sync_fs (
+FATFS* fs
+)
+{
+FRESULT res;
+
+
+res = sync_window(fs);
+if (res == FR_OK) {
+
+if (fs->fs_type == 3 && fs->fsi_flag == 1) {
+
+mem_set(fs->win, 0, ((UINT)512));
+*(BYTE*)(fs->win + 510)=(BYTE)(0xAA55); *((BYTE*)(fs->win + 510)+1)=(BYTE)((WORD)(0xAA55)>>8);
+*(BYTE*)(fs->win + 0)=(BYTE)(0x41615252); *((BYTE*)(fs->win + 0)+1)=(BYTE)((WORD)(0x41615252)>>8); *((BYTE*)(fs->win + 0)+2)=(BYTE)((DWORD)(0x41615252)>>16); *((BYTE*)(fs->win + 0)+3)=(BYTE)((DWORD)(0x41615252)>>24);
+*(BYTE*)(fs->win + 484)=(BYTE)(0x61417272); *((BYTE*)(fs->win + 484)+1)=(BYTE)((WORD)(0x61417272)>>8); *((BYTE*)(fs->win + 484)+2)=(BYTE)((DWORD)(0x61417272)>>16); *((BYTE*)(fs->win + 484)+3)=(BYTE)((DWORD)(0x61417272)>>24);
+*(BYTE*)(fs->win + 488)=(BYTE)(fs->free_clust); *((BYTE*)(fs->win + 488)+1)=(BYTE)((WORD)(fs->free_clust)>>8); *((BYTE*)(fs->win + 488)+2)=(BYTE)((DWORD)(fs->free_clust)>>16); *((BYTE*)(fs->win + 488)+3)=(BYTE)((DWORD)(fs->free_clust)>>24);
+*(BYTE*)(fs->win + 492)=(BYTE)(fs->last_clust); *((BYTE*)(fs->win + 492)+1)=(BYTE)((WORD)(fs->last_clust)>>8); *((BYTE*)(fs->win + 492)+2)=(BYTE)((DWORD)(fs->last_clust)>>16); *((BYTE*)(fs->win + 492)+3)=(BYTE)((DWORD)(fs->last_clust)>>24);
+
+fs->winsect = fs->volbase + 1;
+disk_write(fs->drv, fs->win, fs->winsect, 1);
+fs->fsi_flag = 0;
+}
+
+if (disk_ioctl(fs->drv, 0, 0) != RES_OK)
+res = FR_DISK_ERR;
+}
+
+return res;
+}
+
+# 843
+DWORD clust2sect (
+FATFS* fs,
+DWORD clst
+)
+{
+clst -= 2;
+if (clst >= fs->n_fatent - 2) return 0;
+return clst * fs->csize + fs->database;
+}
+
+# 861
+DWORD get_fat (
+FATFS* fs,
+DWORD clst
+)
+{
+UINT wc, bc;
+BYTE *p;
+DWORD val;
+
+
+if (clst < 2 || clst >= fs->n_fatent) {
+val = 1;
+
+} else {
+val = 0xFFFFFFFF;
+
+switch (fs->fs_type) {
+case 1 :
+bc = (UINT)clst; bc += bc / 2;
+if (move_window(fs, fs->fatbase + (bc / ((UINT)512))) != FR_OK) break;
+wc = fs->win[bc++ % ((UINT)512)];
+if (move_window(fs, fs->fatbase + (bc / ((UINT)512))) != FR_OK) break;
+wc |= fs->win[bc % ((UINT)512)] << 8;
+val = clst & 1 ? wc >> 4 : (wc & 0xFFF);
+break;
+
+case 2 :
+if (move_window(fs, fs->fatbase + (clst / (((UINT)512) / 2))) != FR_OK) break;
+p = &fs->win[clst * 2 % ((UINT)512)];
+val = (WORD)(((WORD)*((BYTE*)(p)+1)<<8)|(WORD)*(BYTE*)(p));
+break;
+
+case 3 :
+if (move_window(fs, fs->fatbase + (clst / (((UINT)512) / 4))) != FR_OK) break;
+p = &fs->win[clst * 4 % ((UINT)512)];
+val = (DWORD)(((DWORD)*((BYTE*)(p)+3)<<24)|((DWORD)*((BYTE*)(p)+2)<<16)|((WORD)*((BYTE*)(p)+1)<<8)|*(BYTE*)(p)) & 0x0FFFFFFF;
+break;
+
+default:
+val = 1;
+}
+}
+
+return val;
+}
+
+# 916
+FRESULT put_fat (
+FATFS* fs,
+DWORD clst,
+DWORD val
+)
+{
+UINT bc;
+BYTE *p;
+FRESULT res;
+
+
+if (clst < 2 || clst >= fs->n_fatent) {
+res = FR_INT_ERR;
+
+} else {
+switch (fs->fs_type) {
+case 1 :
+bc = (UINT)clst; bc += bc / 2;
+res = move_window(fs, fs->fatbase + (bc / ((UINT)512)));
+if (res != FR_OK) break;
+p = &fs->win[bc++ % ((UINT)512)];
+*p = (clst & 1) ? ((*p & 0x0F) | ((BYTE)val << 4)) : (BYTE)val;
+fs->wflag = 1;
+res = move_window(fs, fs->fatbase + (bc / ((UINT)512)));
+if (res != FR_OK) break;
+p = &fs->win[bc % ((UINT)512)];
+*p = (clst & 1) ? (BYTE)(val >> 4) : ((*p & 0xF0) | ((BYTE)(val >> 8) & 0x0F));
+fs->wflag = 1;
+break;
+
+case 2 :
+res = move_window(fs, fs->fatbase + (clst / (((UINT)512) / 2)));
+if (res != FR_OK) break;
+p = &fs->win[clst * 2 % ((UINT)512)];
+*(BYTE*)(p)=(BYTE)((WORD)val); *((BYTE*)(p)+1)=(BYTE)((WORD)((WORD)val)>>8);
+fs->wflag = 1;
+break;
+
+case 3 :
+res = move_window(fs, fs->fatbase + (clst / (((UINT)512) / 4)));
+if (res != FR_OK) break;
+p = &fs->win[clst * 4 % ((UINT)512)];
+val |= (DWORD)(((DWORD)*((BYTE*)(p)+3)<<24)|((DWORD)*((BYTE*)(p)+2)<<16)|((WORD)*((BYTE*)(p)+1)<<8)|*(BYTE*)(p)) & 0xF0000000;
+*(BYTE*)(p)=(BYTE)(val); *((BYTE*)(p)+1)=(BYTE)((WORD)(val)>>8); *((BYTE*)(p)+2)=(BYTE)((DWORD)(val)>>16); *((BYTE*)(p)+3)=(BYTE)((DWORD)(val)>>24);
+fs->wflag = 1;
+break;
+
+default :
+res = FR_INT_ERR;
+}
+}
+
+return res;
+}
+
+# 979
+static
+FRESULT remove_chain (
+FATFS* fs,
+DWORD clst
+)
+{
+FRESULT res;
+DWORD nxt;
+
+DWORD scl = clst, ecl = clst, rt[2];
+
+
+if (clst < 2 || clst >= fs->n_fatent) {
+res = FR_INT_ERR;
+
+} else {
+res = FR_OK;
+while (clst < fs->n_fatent) {
+nxt = get_fat(fs, clst);
+if (nxt == 0) break;
+if (nxt == 1) { res = FR_INT_ERR; break; }
+if (nxt == 0xFFFFFFFF) { res = FR_DISK_ERR; break; }
+res = put_fat(fs, clst, 0);
+if (res != FR_OK) break;
+if (fs->free_clust != 0xFFFFFFFF) {
+fs->free_clust++;
+fs->fsi_flag |= 1;
+}
+
+if (ecl + 1 == nxt) {
+ecl = nxt;
+} else {
+rt[0] = clust2sect(fs, scl);
+rt[1] = clust2sect(fs, ecl) + fs->csize - 1;
+disk_ioctl(fs->drv, 4, rt);
+scl = ecl = nxt;
+}
+
+clst = nxt;
+}
+}
+
+return res;
+}
+
+# 1032
+static
+DWORD create_chain (
+FATFS* fs,
+DWORD clst
+)
+{
+DWORD cs, ncl, scl;
+FRESULT res;
+
+
+if (clst == 0) {
+scl = fs->last_clust;
+if (!scl || scl >= fs->n_fatent) scl = 1;
+}
+else {
+cs = get_fat(fs, clst);
+if (cs < 2) return 1;
+if (cs == 0xFFFFFFFF) return cs;
+if (cs < fs->n_fatent) return cs;
+scl = clst;
+}
+
+ncl = scl;
+for (;;) {
+ncl++;
+if (ncl >= fs->n_fatent) {
+ncl = 2;
+if (ncl > scl) return 0;
+}
+cs = get_fat(fs, ncl);
+if (cs == 0) break;
+if (cs == 0xFFFFFFFF || cs == 1)
+return cs;
+if (ncl == scl) return 0;
+}
+
+res = put_fat(fs, ncl, 0x0FFFFFFF);
+if (res == FR_OK && clst != 0) {
+res = put_fat(fs, clst, ncl);
+}
+if (res == FR_OK) {
+fs->last_clust = ncl;
+if (fs->free_clust != 0xFFFFFFFF) {
+fs->free_clust--;
+fs->fsi_flag |= 1;
+}
+} else {
+ncl = (res == FR_DISK_ERR) ? 0xFFFFFFFF : 1;
+}
+
+return ncl;
+}
+
+# 1094
+static
+DWORD clmt_clust (
+FIL* fp,
+DWORD ofs
+)
+{
+DWORD cl, ncl, *tbl;
+
+
+tbl = fp->cltbl + 1;
+cl = ofs / ((UINT)512) / fp->fs->csize;
+for (;;) {
+ncl = *tbl++;
+if (!ncl) return 0;
+if (cl < ncl) break;
+cl -= ncl; tbl++;
+}
+return cl + *tbl;
+}
+
+# 1122
+static
+FRESULT dir_sdi (
+DIR* dp,
+UINT idx
+)
+{
+DWORD clst, sect;
+UINT ic;
+
+
+dp->index = (WORD)idx;
+clst = dp->sclust;
+if (clst == 1 || clst >= dp->fs->n_fatent)
+return FR_INT_ERR;
+if (!clst && dp->fs->fs_type == 3)
+clst = dp->fs->dirbase;
+
+if (clst == 0) {
+if (idx >= dp->fs->n_rootdir)
+return FR_INT_ERR;
+sect = dp->fs->dirbase;
+}
+else {
+ic = ((UINT)512) / 32 * dp->fs->csize;
+while (idx >= ic) {
+clst = get_fat(dp->fs, clst);
+if (clst == 0xFFFFFFFF) return FR_DISK_ERR;
+if (clst < 2 || clst >= dp->fs->n_fatent)
+return FR_INT_ERR;
+idx -= ic;
+}
+sect = clust2sect(dp->fs, clst);
+}
+dp->clust = clst;
+if (!sect) return FR_INT_ERR;
+dp->sect = sect + idx / (((UINT)512) / 32);
+dp->dir = dp->fs->win + (idx % (((UINT)512) / 32)) * 32;
+
+return FR_OK;
+}
+
+# 1170
+static
+FRESULT dir_next (
+DIR* dp,
+int stretch
+)
+{
+DWORD clst;
+UINT i;
+
+UINT c;
+
+
+
+i = dp->index + 1;
+if (!(i & 0xFFFF) || !dp->sect)
+return FR_NO_FILE;
+
+if (!(i % (((UINT)512) / 32))) {
+dp->sect++;
+
+if (!dp->clust) {
+if (i >= dp->fs->n_rootdir)
+return FR_NO_FILE;
+}
+else {
+if (((i / (((UINT)512) / 32)) & (dp->fs->csize - 1)) == 0) {
+clst = get_fat(dp->fs, dp->clust);
+if (clst <= 1) return FR_INT_ERR;
+if (clst == 0xFFFFFFFF) return FR_DISK_ERR;
+if (clst >= dp->fs->n_fatent) {
+
+if (!stretch) return FR_NO_FILE;
+clst = create_chain(dp->fs, dp->clust);
+if (clst == 0) return FR_DENIED;
+if (clst == 1) return FR_INT_ERR;
+if (clst == 0xFFFFFFFF) return FR_DISK_ERR;
+
+if (sync_window(dp->fs)) return FR_DISK_ERR;
+mem_set(dp->fs->win, 0, ((UINT)512));
+dp->fs->winsect = clust2sect(dp->fs, clst);
+for (c = 0; c < dp->fs->csize; c++) {
+dp->fs->wflag = 1;
+if (sync_window(dp->fs)) return FR_DISK_ERR;
+dp->fs->winsect++;
+}
+dp->fs->winsect -= c;
+
+# 1220
+}
+dp->clust = clst;
+dp->sect = clust2sect(dp->fs, clst);
+}
+}
+}
+
+dp->index = (WORD)i;
+dp->dir = dp->fs->win + (i % (((UINT)512) / 32)) * 32;
+
+return FR_OK;
+}
+
+# 1241
+static
+FRESULT dir_alloc (
+DIR* dp,
+UINT nent
+)
+{
+FRESULT res;
+UINT n;
+
+
+res = dir_sdi(dp, 0);
+if (res == FR_OK) {
+n = 0;
+do {
+res = move_window(dp->fs, dp->sect);
+if (res != FR_OK) break;
+if (dp->dir[0] == 0xE5 || dp->dir[0] == 0) {
+if (++n == nent) break;
+} else {
+n = 0;
+}
+res = dir_next(dp, 1);
+} while (res == FR_OK);
+}
+if (res == FR_NO_FILE) res = FR_DENIED;
+return res;
+}
+
+# 1277
+static
+DWORD ld_clust (
+FATFS* fs,
+const BYTE* dir
+)
+{
+DWORD cl;
+
+cl = (WORD)(((WORD)*((BYTE*)(dir + 26)+1)<<8)|(WORD)*(BYTE*)(dir + 26));
+if (fs->fs_type == 3)
+cl |= (DWORD)(WORD)(((WORD)*((BYTE*)(dir + 20)+1)<<8)|(WORD)*(BYTE*)(dir + 20)) << 16;
+
+return cl;
+}
+
+
+
+static
+void st_clust (
+BYTE* dir,
+DWORD cl
+)
+{
+*(BYTE*)(dir + 26)=(BYTE)(cl); *((BYTE*)(dir + 26)+1)=(BYTE)((WORD)(cl)>>8);
+*(BYTE*)(dir + 20)=(BYTE)(cl >> 16); *((BYTE*)(dir + 20)+1)=(BYTE)((WORD)(cl >> 16)>>8);
+}
+
+# 1500
+static
+FRESULT dir_find (
+DIR* dp
+)
+{
+FRESULT res;
+BYTE c, *dir;
+
+# 1511
+res = dir_sdi(dp, 0);
+if (res != FR_OK) return res;
+
+# 1517
+do {
+res = move_window(dp->fs, dp->sect);
+if (res != FR_OK) break;
+dir = dp->dir;
+c = dir[0];
+if (c == 0) { res = FR_NO_FILE; break; }
+
+# 1545
+if (!(dir[11] & 0x08) && !mem_cmp(dir, dp->fn, 11))
+break;
+
+res = dir_next(dp, 0);
+} while (res == FR_OK);
+
+return res;
+}
+
+# 1561
+static
+FRESULT dir_read (
+DIR* dp,
+int vol
+)
+{
+FRESULT res;
+BYTE a, c, *dir;
+
+# 1573
+res = FR_NO_FILE;
+while (dp->sect) {
+res = move_window(dp->fs, dp->sect);
+if (res != FR_OK) break;
+dir = dp->dir;
+c = dir[0];
+if (c == 0) { res = FR_NO_FILE; break; }
+a = dir[11] & 0x3F;
+
+# 1600
+if (c != 0xE5 && (2 || c != '.') && a != 0x0F && (int)((a & ~0x20) == 0x08) == vol)
+break;
+
+res = dir_next(dp, 0);
+if (res != FR_OK) break;
+}
+
+if (res != FR_OK) dp->sect = 0;
+
+return res;
+}
+
+# 1620
+static
+FRESULT dir_register (
+DIR* dp
+)
+{
+FRESULT res;
+
+# 1672
+res = dir_alloc(dp, 1);
+
+
+if (res == FR_OK) {
+res = move_window(dp->fs, dp->sect);
+if (res == FR_OK) {
+mem_set(dp->dir, 0, 32);
+mem_cpy(dp->dir, dp->fn, 11);
+
+# 1683
+dp->fs->wflag = 1;
+}
+}
+
+return res;
+}
+
+# 1698
+static
+FRESULT dir_remove (
+DIR* dp
+)
+{
+FRESULT res;
+
+# 1723
+res = dir_sdi(dp, dp->index);
+if (res == FR_OK) {
+res = move_window(dp->fs, dp->sect);
+if (res == FR_OK) {
+mem_set(dp->dir, 0, 32);
+*dp->dir = 0xE5;
+dp->fs->wflag = 1;
+}
+}
+
+
+return res;
+}
+
+# 1745
+static
+void get_fileinfo (
+DIR* dp,
+FILINFO* fno
+)
+{
+UINT i;
+TCHAR *p, c;
+BYTE *dir;
+
+# 1758
+p = fno->fname;
+if (dp->sect) {
+dir = dp->dir;
+i = 0;
+while (i < 11) {
+c = (TCHAR)dir[i++];
+if (c == ' ') continue;
+if (c == 0x05) c = (TCHAR)0xE5;
+if (i == 9) *p++ = '.';
+
+# 1777
+*p++ = c;
+}
+fno->fattrib = dir[11];
+fno->fsize = (DWORD)(((DWORD)*((BYTE*)(dir + 28)+3)<<24)|((DWORD)*((BYTE*)(dir + 28)+2)<<16)|((WORD)*((BYTE*)(dir + 28)+1)<<8)|*(BYTE*)(dir + 28));
+fno->fdate = (WORD)(((WORD)*((BYTE*)(dir + 24)+1)<<8)|(WORD)*(BYTE*)(dir + 24));
+fno->ftime = (WORD)(((WORD)*((BYTE*)(dir + 22)+1)<<8)|(WORD)*(BYTE*)(dir + 22));
+}
+*p = 0;
+
+# 1805
+}
+
+# 1815
+static
+WCHAR get_achar (
+const TCHAR** ptr
+)
+{
+WCHAR chr;
+
+
+chr = (BYTE)*(*ptr)++;
+if ((((chr)>='a')&&((chr)<='z'))) chr -= 0x20;
+if ((((BYTE)(chr) >= 0x81 && (BYTE)(chr) <= 0x9F) || ((BYTE)(chr) >= 0xE0 && (BYTE)(chr) <= 0xFC)) && (((BYTE)(**ptr) >= 0x40 && (BYTE)(**ptr) <= 0x7E) || ((BYTE)(**ptr) >= 0x80 && (BYTE)(**ptr) <= 0xFC)))
+chr = chr << 8 | (BYTE)*(*ptr)++;
+
+# 1833
+return chr;
+}
+
+
+static
+int pattern_matching (
+const TCHAR* pat,
+const TCHAR* nam,
+int skip,
+int inf
+)
+{
+const TCHAR *pp, *np;
+WCHAR pc, nc;
+int nm, nx;
+
+
+while (skip--) {
+if (!get_achar(&nam)) return 0;
+}
+if (!*pat && inf) return 1;
+
+do {
+pp = pat; np = nam;
+for (;;) {
+if (*pp == '?' || *pp == '*') {
+nm = nx = 0;
+do {
+if (*pp++ == '?') nm++; else nx = 1;
+} while (*pp == '?' || *pp == '*');
+if (pattern_matching(pp, np, nm, nx)) return 1;
+nc = *np; break;
+}
+pc = get_achar(&pp);
+nc = get_achar(&np);
+if (pc != nc) break;
+if (!pc) return 1;
+}
+get_achar(&nam);
+} while (inf && nc);
+
+return 0;
+}
+
+# 1885
+static
+FRESULT create_name (
+DIR* dp,
+const TCHAR** path
+)
+{
+
+# 2012
+BYTE b, c, d, *sfn;
+UINT ni, si, i;
+const char *p;
+
+
+for (p = *path; *p == '/' || *p == '\\'; p++) ;
+sfn = dp->fn;
+mem_set(sfn, ' ', 11);
+si = i = b = 0; ni = 8;
+
+if (p[si] == '.') {
+for (;;) {
+c = (BYTE)p[si++];
+if (c != '.' || si >= 3) break;
+sfn[i++] = c;
+}
+if (c != '/' && c != '\\' && c > ' ') return FR_INVALID_NAME;
+*path = &p[si];
+sfn[11] = (c <= ' ') ? 0x04 | 0x20 : 0x20;
+return FR_OK;
+}
+
+for (;;) {
+c = (BYTE)p[si++];
+if (c <= ' ' || c == '/' || c == '\\') break;
+if (c == '.' || i >= ni) {
+if (ni != 8 || c != '.') return FR_INVALID_NAME;
+i = 8; ni = 11;
+b <<= 2; continue;
+}
+if (c >= 0x80) {
+b |= 3;
+
+# 2051
+}
+if ((((BYTE)(c) >= 0x81 && (BYTE)(c) <= 0x9F) || ((BYTE)(c) >= 0xE0 && (BYTE)(c) <= 0xFC))) {
+d = (BYTE)p[si++];
+if (!(((BYTE)(d) >= 0x40 && (BYTE)(d) <= 0x7E) || ((BYTE)(d) >= 0x80 && (BYTE)(d) <= 0xFC)) || i >= ni - 1)
+return FR_INVALID_NAME;
+sfn[i++] = c;
+sfn[i++] = d;
+} else {
+if (chk_chr("\"*+,:;<=>\?[]|\x7F", c))
+return FR_INVALID_NAME;
+if ((((c)>='A')&&((c)<='Z'))) {
+b |= 2;
+} else {
+if ((((c)>='a')&&((c)<='z'))) {
+b |= 1; c -= 0x20;
+}
+}
+sfn[i++] = c;
+}
+}
+*path = &p[si];
+c = (c <= ' ') ? 0x04 : 0;
+
+if (!i) return FR_INVALID_NAME;
+if (sfn[0] == 0xE5) sfn[0] = 0x05;
+
+if (ni == 8) b <<= 2;
+if ((b & 0x03) == 0x01) c |= 0x10;
+if ((b & 0x0C) == 0x04) c |= 0x08;
+
+sfn[11] = c;
+
+return FR_OK;
+
+}
+
+# 2094
+static
+FRESULT follow_path (
+DIR* dp,
+const TCHAR* path
+)
+{
+FRESULT res;
+BYTE *dir, ns;
+
+
+
+if (*path == '/' || *path == '\\') {
+path++; dp->sclust = 0;
+} else {
+dp->sclust = dp->fs->cdir;
+}
+
+# 2116
+if ((UINT)*path < ' ') {
+res = dir_sdi(dp, 0);
+dp->dir = 0;
+} else {
+for (;;) {
+res = create_name(dp, &path);
+if (res != FR_OK) break;
+res = dir_find(dp);
+ns = dp->fn[11];
+if (res != FR_OK) {
+if (res == FR_NO_FILE) {
+if (2 && (ns & 0x20)) {
+dp->sclust = 0; dp->dir = 0;
+if (!(ns & 0x04)) continue;
+res = FR_OK;
+} else {
+if (!(ns & 0x04)) res = FR_NO_PATH;
+}
+}
+break;
+}
+if (ns & 0x04) break;
+dir = dp->dir;
+if (!(dir[11] & 0x10)) {
+res = FR_NO_PATH; break;
+}
+dp->sclust = ld_clust(dp->fs, dir);
+}
+}
+
+return res;
+}
+
+# 2156
+char ld1,ld2,ld3;
+char myvar[5];
+
+static
+int get_ldnumber (
+const TCHAR** path
+)
+{
+ld1=ld2=ld3=0;
+const TCHAR *tp, *tt;
+UINT i;
+int vol = -1;
+
+myvar[0] = 1;
+static const char* const str[] = {"RAM","NAND","CF","SD1","SD2","USB1","USB2","USB3"};
+const char *sp;
+char c;
+TCHAR tc;
+
+
+ld2 = 3;
+if (*path) {
+ld2 = 4;myvar[1] = 1;
+for (tt = *path; (UINT)*tt >= (0 ? ' ' : '!') && *tt != ':'; tt++) ;
+if (*tt == ':') {
+ld1 = 12;
+tp = *path;
+i = *tp++ - '0';
+if (i < 10 && tp == tt) {
+ld3 = 11;
+if (i < 5) {
+vol = (int)i;
+*path = ++tt;
+}
+}
+
+else {
+ld3 = 12;;
+i = 0; tt++;
+do {
+sp = str[i]; tp = *path;
+do {
+c = *sp++; tc = *tp++;
+if ((((tc)>='a')&&((tc)<='z'))) tc -= 0x20;
+} while (c && (TCHAR)c == tc);
+} while ((c || tp != tt) && ++i < 5);
+if (i < 5) {
+vol = (int)i;
+*path = tt;
+}
+}
+myvar[2] = 1;
+
+return vol;
+}
+ld1 = 15;
+
+vol = CurrVol;
+
+# 2217
+}
+return vol;
+}
+
+# 2227
+unsigned int chr;
+FATFS* tfs;
+static
+BYTE check_fs (
+FATFS* fs,
+DWORD sect
+)
+{
+chr = 1;
+fs->wflag = 0; fs->winsect = 0xFFFFFFFF;
+if (move_window(fs, sect) != FR_OK)
+return 3;
+chr = 2;
+if ((WORD)(((WORD)*((BYTE*)(&fs->win[510])+1)<<8)|(WORD)*(BYTE*)(&fs->win[510])) != 0xAA55)
+return 2;
+chr = 3;
+
+if (((DWORD)(((DWORD)*((BYTE*)(&fs->win[54])+3)<<24)|((DWORD)*((BYTE*)(&fs->win[54])+2)<<16)|((WORD)*((BYTE*)(&fs->win[54])+1)<<8)|*(BYTE*)(&fs->win[54])) & 0xFFFFFF) == 0x544146)
+{
+chr = 30;
+return 0;
+}
+chr = 4;
+if (((DWORD)(((DWORD)*((BYTE*)(&fs->win[82])+3)<<24)|((DWORD)*((BYTE*)(&fs->win[82])+2)<<16)|((WORD)*((BYTE*)(&fs->win[82])+1)<<8)|*(BYTE*)(&fs->win[82])) & 0xFFFFFF) == 0x544146)
+return 0;
+chr = 5;
+return 1;
+}
+
+# 2262
+unsigned int ch;
+static
+FRESULT find_volume (
+FATFS** rfs,
+const TCHAR** path,
+BYTE wmode
+)
+{
+BYTE fmt, *pt;
+int vol;
+DSTATUS stat;
+DWORD bsect, fasize, tsect, sysect, nclst, szbfat, br[4];
+WORD nrsv;
+FATFS *fs;
+UINT i;
+
+ch = 23;
+
+*rfs = 0;
+vol = get_ldnumber(path);
+if (vol < 0){ch = 25; return FR_INVALID_DRIVE;}
+ch = 24;
+
+fs = FatFs[vol];
+if (!fs) return FR_NOT_ENABLED;
+ch = 26;
+;
+*rfs = fs;
+ch = 27;
+if (fs->fs_type) {
+stat = disk_status(fs->drv);
+if (!(stat & 0x01)) {
+if (!0 && wmode && (stat & 0x04))
+return FR_WRITE_PROTECTED;
+return FR_OK;
+}
+}
+ch = 28;
+
+
+
+fs->fs_type = 0;
+fs->drv = (BYTE)(vol);
+stat = disk_initialize(fs->drv);
+if (stat & 0x01)
+return FR_NOT_READY;
+if (!0 && wmode && (stat & 0x04))
+return FR_WRITE_PROTECTED;
+ch = 29;
+
+# 2315
+ch = 30;
+
+bsect = 0;
+ch = fmt = check_fs(fs, bsect);
+ch = 61;
+if (fmt == 1 || (!fmt && (0))) {
+ch = 62;
+for (i = 0; i < 4; i++) { ch = 36;
+pt = fs->win + 446 + i * 16;
+br[i] = pt[4] ? (DWORD)(((DWORD)*((BYTE*)(&pt[8])+3)<<24)|((DWORD)*((BYTE*)(&pt[8])+2)<<16)|((WORD)*((BYTE*)(&pt[8])+1)<<8)|*(BYTE*)(&pt[8])) : 0;
+}
+i = 0;
+if (i) i--;
+do { ch = 34;
+
+bsect = br[i];
+fmt = bsect ? check_fs(fs, bsect) : 2;
+} while (!0 && fmt && ++i < 4);
+}
+ch = 32;
+if (fmt == 3) return FR_DISK_ERR;
+if (fmt) return FR_NO_FILESYSTEM;
+ch = 31;
+
+
+if ((WORD)(((WORD)*((BYTE*)(fs->win + 11)+1)<<8)|(WORD)*(BYTE*)(fs->win + 11)) != ((UINT)512))
+return FR_NO_FILESYSTEM;
+ch = 88;
+fasize = (WORD)(((WORD)*((BYTE*)(fs->win + 22)+1)<<8)|(WORD)*(BYTE*)(fs->win + 22));
+if (!fasize) fasize = (DWORD)(((DWORD)*((BYTE*)(fs->win + 36)+3)<<24)|((DWORD)*((BYTE*)(fs->win + 36)+2)<<16)|((WORD)*((BYTE*)(fs->win + 36)+1)<<8)|*(BYTE*)(fs->win + 36));
+fs->fsize = fasize;
+ch = 89;
+fs->n_fats = fs->win[16];
+if (fs->n_fats != 1 && fs->n_fats != 2)
+return FR_NO_FILESYSTEM;
+fasize *= fs->n_fats;
+ch = 90;
+fs->csize = fs->win[13];
+if (!fs->csize || (fs->csize & (fs->csize - 1)))
+return FR_NO_FILESYSTEM;
+ch = 91;
+fs->n_rootdir = (WORD)(((WORD)*((BYTE*)(fs->win + 17)+1)<<8)|(WORD)*(BYTE*)(fs->win + 17));
+if (fs->n_rootdir % (((UINT)512) / 32))
+return FR_NO_FILESYSTEM;
+ch = 92;
+tsect = (WORD)(((WORD)*((BYTE*)(fs->win + 19)+1)<<8)|(WORD)*(BYTE*)(fs->win + 19));
+if (!tsect) tsect = (DWORD)(((DWORD)*((BYTE*)(fs->win + 32)+3)<<24)|((DWORD)*((BYTE*)(fs->win + 32)+2)<<16)|((WORD)*((BYTE*)(fs->win + 32)+1)<<8)|*(BYTE*)(fs->win + 32));
+ch = 93;
+nrsv = (WORD)(((WORD)*((BYTE*)(fs->win + 14)+1)<<8)|(WORD)*(BYTE*)(fs->win + 14));
+if (!nrsv) return FR_NO_FILESYSTEM;
+ch = 94;
+
+sysect = nrsv + fasize + fs->n_rootdir / (((UINT)512) / 32);
+if (tsect < sysect) return FR_NO_FILESYSTEM;
+nclst = (tsect - sysect) / fs->csize;
+if (!nclst) return FR_NO_FILESYSTEM;
+fmt = 1;
+if (nclst >= 4086U) fmt = 2;
+if (nclst >= 65526U) fmt = 3;
+ch = 95;
+
+fs->n_fatent = nclst + 2;
+fs->volbase = bsect;
+fs->fatbase = bsect + nrsv;
+fs->database = bsect + sysect;
+if (fmt == 3) {
+if (fs->n_rootdir) return FR_NO_FILESYSTEM;
+fs->dirbase = (DWORD)(((DWORD)*((BYTE*)(fs->win + 44)+3)<<24)|((DWORD)*((BYTE*)(fs->win + 44)+2)<<16)|((WORD)*((BYTE*)(fs->win + 44)+1)<<8)|*(BYTE*)(fs->win + 44));
+szbfat = fs->n_fatent * 4;
+} else {
+if (!fs->n_rootdir) return FR_NO_FILESYSTEM;
+fs->dirbase = fs->fatbase + fasize;
+szbfat = (fmt == 2) ?
+fs->n_fatent * 2 : fs->n_fatent * 3 / 2 + (fs->n_fatent & 1);
+}
+if (fs->fsize < (szbfat + (((UINT)512) - 1)) / ((UINT)512))
+return FR_NO_FILESYSTEM;
+ch = 96;
+
+
+fs->last_clust = fs->free_clust = 0xFFFFFFFF;
+ch = 97;
+
+fs->fsi_flag = 0x80;
+
+if (fmt == 3
+&& (WORD)(((WORD)*((BYTE*)(fs->win + 48)+1)<<8)|(WORD)*(BYTE*)(fs->win + 48)) == 1
+&& move_window(fs, bsect + 1) == FR_OK)
+{
+fs->fsi_flag = 0;
+if ((WORD)(((WORD)*((BYTE*)(fs->win + 510)+1)<<8)|(WORD)*(BYTE*)(fs->win + 510)) == 0xAA55
+&& (DWORD)(((DWORD)*((BYTE*)(fs->win + 0)+3)<<24)|((DWORD)*((BYTE*)(fs->win + 0)+2)<<16)|((WORD)*((BYTE*)(fs->win + 0)+1)<<8)|*(BYTE*)(fs->win + 0)) == 0x41615252
+&& (DWORD)(((DWORD)*((BYTE*)(fs->win + 484)+3)<<24)|((DWORD)*((BYTE*)(fs->win + 484)+2)<<16)|((WORD)*((BYTE*)(fs->win + 484)+1)<<8)|*(BYTE*)(fs->win + 484)) == 0x61417272)
+{
+
+fs->free_clust = (DWORD)(((DWORD)*((BYTE*)(fs->win + 488)+3)<<24)|((DWORD)*((BYTE*)(fs->win + 488)+2)<<16)|((WORD)*((BYTE*)(fs->win + 488)+1)<<8)|*(BYTE*)(fs->win + 488));
+
+
+fs->last_clust = (DWORD)(((DWORD)*((BYTE*)(fs->win + 492)+3)<<24)|((DWORD)*((BYTE*)(fs->win + 492)+2)<<16)|((WORD)*((BYTE*)(fs->win + 492)+1)<<8)|*(BYTE*)(fs->win + 492));
+
+}
+}
+
+
+fs->fs_type = fmt;
+fs->id = ++Fsid;
+
+fs->cdir = 0;
+
+# 2428
+return FR_OK;
+}
+
+# 2438
+static
+FRESULT validate (
+void* obj
+)
+{
+FIL *fil = (FIL*)obj;
+
+
+if (!fil || !fil->fs || !fil->fs->fs_type || fil->fs->id != fil->id || (disk_status(fil->fs->drv) & 0x01))
+return FR_INVALID_OBJECT;
+
+;
+
+return FR_OK;
+}
+
+# 2468
+FATFS *Tfs;
+int *Tvol;
+FRESULT *Tres;
+TCHAR *Trp;
+
+
+unsigned char AB1,AB2,AB3;
+FRESULT f_mount (
+FATFS* fs,
+const TCHAR* path,
+BYTE opt
+)
+{
+FATFS *cfs;
+int vol;
+FRESULT res;
+const TCHAR *rp = path;
+
+Tfs = cfs;
+Tvol = &vol;
+Tres = &res;
+Trp = (TCHAR *)rp;
+
+AB1 = 1;
+AB2 = vol = get_ldnumber(&rp);
+if (vol < 0) return FR_INVALID_DRIVE;
+cfs = FatFs[vol];
+
+if (cfs) {
+AB3 = 1;
+
+# 2504
+cfs->fs_type = 0;
+}
+
+if (fs) {
+AB3 =2;
+fs->fs_type = 0;
+
+# 2513
+}
+FatFs[vol] = fs;
+
+if (!fs || opt != 1) return FR_OK;
+AB3 =5;
+AB1 = res = find_volume(&fs, &path, 0);
+AB3 =6;
+return res;
+}
+
+# 2529
+unsigned int abc;
+
+
+FRESULT f_open (
+FIL* fp,
+const TCHAR* path,
+BYTE mode
+)
+{
+FRESULT res;
+DIR dj;
+BYTE *dir;
+BYTE sfn[12];
+
+DWORD dw, cl;
+
+
+abc = 12;
+if (!fp) return FR_INVALID_OBJECT;
+fp->fs = 0;
+abc++;
+
+
+abc = 61;
+mode &= 0x01 | 0x02 | 0x08 | 0x10 | 0x04;
+res = find_volume(&dj.fs, &path, (BYTE)(mode & ~0x01));
+
+# 2561
+abc++;
+if (res == FR_OK) {
+abc = 96;
+(dj).fn = sfn;
+res = follow_path(&dj, path);
+dir = dj.dir;
+
+if (res == FR_OK) {
+abc = 97;
+if (!dir)
+res = FR_INVALID_NAME;
+
+# 2576
+}
+abc++;
+
+if (mode & (0x08 | 0x10 | 0x04)) {
+abc = 98;
+if (res != FR_OK) { abc = 133;
+if (res == FR_NO_FILE)
+
+
+
+res = dir_register(&dj);
+
+mode |= 0x08;
+dir = dj.dir; abc = 157;
+}
+else { abc = 134;
+if (dir[11] & (0x01 | 0x10)) {
+res = FR_DENIED;
+} else {
+if (mode & 0x04)
+res = FR_EXIST;
+}
+}
+if (res == FR_OK && (mode & 0x08)) { abc = 136;
+dw = ((DWORD)(2016 - 1980) << 25 | (DWORD)7 << 21 | (DWORD)30 << 16);
+*(BYTE*)(dir + 14)=(BYTE)(dw); *((BYTE*)(dir + 14)+1)=(BYTE)((WORD)(dw)>>8); *((BYTE*)(dir + 14)+2)=(BYTE)((DWORD)(dw)>>16); *((BYTE*)(dir + 14)+3)=(BYTE)((DWORD)(dw)>>24);
+*(BYTE*)(dir + 22)=(BYTE)(dw); *((BYTE*)(dir + 22)+1)=(BYTE)((WORD)(dw)>>8); *((BYTE*)(dir + 22)+2)=(BYTE)((DWORD)(dw)>>16); *((BYTE*)(dir + 22)+3)=(BYTE)((DWORD)(dw)>>24);
+dir[11] = 0;
+*(BYTE*)(dir + 28)=(BYTE)(0); *((BYTE*)(dir + 28)+1)=(BYTE)((WORD)(0)>>8); *((BYTE*)(dir + 28)+2)=(BYTE)((DWORD)(0)>>16); *((BYTE*)(dir + 28)+3)=(BYTE)((DWORD)(0)>>24);
+cl = ld_clust(dj.fs, dir);
+st_clust(dir, 0);
+dj.fs->wflag = 1;
+if (cl) {
+dw = dj.fs->winsect;
+res = remove_chain(dj.fs, cl);
+if (res == FR_OK) {
+dj.fs->last_clust = cl - 1;
+res = move_window(dj.fs, dw);
+}
+}
+}
+}
+else { abc = 99;
+if (res == FR_OK) {
+if (dir[11] & 0x10) {
+res = FR_NO_FILE;
+} else {
+if ((mode & 0x02) && (dir[11] & 0x01))
+res = FR_DENIED;
+}
+}
+}
+if (res == FR_OK) { abc = 125;
+if (mode & 0x08)
+mode |= 0x20;
+fp->dir_sect = dj.fs->winsect;
+fp->dir_ptr = dir;
+
+# 2637
+}
+
+# 2651
+;
+
+if (res == FR_OK) { abc = 127;
+fp->flag = mode;
+fp->err = 0;
+fp->sclust = ld_clust(dj.fs, dir);
+fp->fsize = (DWORD)(((DWORD)*((BYTE*)(dir + 28)+3)<<24)|((DWORD)*((BYTE*)(dir + 28)+2)<<16)|((WORD)*((BYTE*)(dir + 28)+1)<<8)|*(BYTE*)(dir + 28));
+fp->fptr = 0;
+fp->dsect = 0;
+
+fp->cltbl = 0;
+
+fp->fs = dj.fs;
+fp->id = fp->fs->id;
+}
+}
+
+return res;
+}
+
+# 2678
+FRESULT f_read (
+FIL* fp,
+void* buff,
+UINT btr,
+UINT* br
+)
+{
+FRESULT res;
+DWORD clst, sect, remain;
+UINT rcnt, cc;
+BYTE csect, *rbuff = (BYTE*)buff;
+
+
+*br = 0;
+
+res = validate(fp);
+if (res != FR_OK) return res;
+if (fp->err)
+return (FRESULT)fp->err;
+if (!(fp->flag & 0x01))
+return FR_DENIED;
+remain = fp->fsize - fp->fptr;
+if (btr > remain) btr = (UINT)remain;
+
+for ( ; btr;
+rbuff += rcnt, fp->fptr += rcnt, *br += rcnt, btr -= rcnt) {
+if ((fp->fptr % ((UINT)512)) == 0) {
+csect = (BYTE)(fp->fptr / ((UINT)512) & (fp->fs->csize - 1));
+if (!csect) {
+if (fp->fptr == 0) {
+clst = fp->sclust;
+} else {
+
+if (fp->cltbl)
+clst = clmt_clust(fp, fp->fptr);
+else
+
+clst = get_fat(fp->fs, fp->clust);
+}
+if (clst < 2) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+if (clst == 0xFFFFFFFF) { fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+fp->clust = clst;
+}
+sect = clust2sect(fp->fs, fp->clust);
+if (!sect) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+sect += csect;
+cc = btr / ((UINT)512);
+if (cc) {
+if (csect + cc > fp->fs->csize)
+cc = fp->fs->csize - csect;
+if (disk_read(fp->fs->drv, rbuff, sect, cc) != RES_OK)
+{ fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+
+
+if (fp->fs->wflag && fp->fs->winsect - sect < cc)
+mem_cpy(rbuff + ((fp->fs->winsect - sect) * ((UINT)512)), fp->fs->win, ((UINT)512));
+
+# 2739
+rcnt = ((UINT)512) * cc;
+continue;
+}
+
+# 2755
+fp->dsect = sect;
+}
+rcnt = ((UINT)512) - ((UINT)fp->fptr % ((UINT)512));
+if (rcnt > btr) rcnt = btr;
+
+if (move_window(fp->fs, fp->dsect) != FR_OK)
+{ fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+mem_cpy(rbuff, &fp->fs->win[fp->fptr % ((UINT)512)], rcnt);
+
+# 2766
+}
+
+return FR_OK;
+}
+
+# 2779
+FRESULT f_write (
+FIL* fp,
+const void *buff,
+UINT btw,
+UINT* bw
+)
+{
+FRESULT res;
+DWORD clst, sect;
+UINT wcnt, cc;
+const BYTE *wbuff = (const BYTE*)buff;
+BYTE csect;
+
+
+*bw = 0;
+
+res = validate(fp);
+if (res != FR_OK) return res;
+if (fp->err)
+return (FRESULT)fp->err;
+if (!(fp->flag & 0x02))
+return FR_DENIED;
+if (fp->fptr + btw < fp->fptr) btw = 0;
+
+for ( ; btw;
+wbuff += wcnt, fp->fptr += wcnt, *bw += wcnt, btw -= wcnt) {
+if ((fp->fptr % ((UINT)512)) == 0) {
+csect = (BYTE)(fp->fptr / ((UINT)512) & (fp->fs->csize - 1));
+if (!csect) {
+if (fp->fptr == 0) {
+clst = fp->sclust;
+if (clst == 0)
+clst = create_chain(fp->fs, 0);
+} else {
+
+if (fp->cltbl)
+clst = clmt_clust(fp, fp->fptr);
+else
+
+clst = create_chain(fp->fs, fp->clust);
+}
+if (clst == 0) break;
+if (clst == 1) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+if (clst == 0xFFFFFFFF) { fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+fp->clust = clst;
+if (fp->sclust == 0) fp->sclust = clst;
+}
+
+if (fp->fs->winsect == fp->dsect && sync_window(fp->fs))
+{ fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+
+# 2836
+sect = clust2sect(fp->fs, fp->clust);
+if (!sect) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+sect += csect;
+cc = btw / ((UINT)512);
+if (cc) {
+if (csect + cc > fp->fs->csize)
+cc = fp->fs->csize - csect;
+if (disk_write(fp->fs->drv, wbuff, sect, cc) != RES_OK)
+{ fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+
+
+if (fp->fs->winsect - sect < cc) {
+mem_cpy(fp->fs->win, wbuff + ((fp->fs->winsect - sect) * ((UINT)512)), ((UINT)512));
+fp->fs->wflag = 0;
+}
+
+# 2858
+wcnt = ((UINT)512) * cc;
+continue;
+}
+
+if (fp->fptr >= fp->fsize) {
+if (sync_window(fp->fs)) { fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+fp->fs->winsect = sect;
+}
+
+# 2873
+fp->dsect = sect;
+}
+wcnt = ((UINT)512) - ((UINT)fp->fptr % ((UINT)512));
+if (wcnt > btw) wcnt = btw;
+
+if (move_window(fp->fs, fp->dsect) != FR_OK)
+{ fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+mem_cpy(&fp->fs->win[fp->fptr % ((UINT)512)], wbuff, wcnt);
+fp->fs->wflag = 1;
+
+# 2886
+}
+
+if (fp->fptr > fp->fsize) fp->fsize = fp->fptr;
+fp->flag |= 0x20;
+
+return FR_OK;
+}
+
+# 2901
+FRESULT f_sync (
+FIL* fp
+)
+{
+FRESULT res;
+DWORD tm;
+BYTE *dir;
+
+
+res = validate(fp);
+if (res == FR_OK) {
+if (fp->flag & 0x20) {
+
+# 2921
+res = move_window(fp->fs, fp->dir_sect);
+if (res == FR_OK) {
+dir = fp->dir_ptr;
+dir[11] |= 0x20;
+*(BYTE*)(dir + 28)=(BYTE)(fp->fsize); *((BYTE*)(dir + 28)+1)=(BYTE)((WORD)(fp->fsize)>>8); *((BYTE*)(dir + 28)+2)=(BYTE)((DWORD)(fp->fsize)>>16); *((BYTE*)(dir + 28)+3)=(BYTE)((DWORD)(fp->fsize)>>24);
+st_clust(dir, fp->sclust);
+tm = ((DWORD)(2016 - 1980) << 25 | (DWORD)7 << 21 | (DWORD)30 << 16);
+*(BYTE*)(dir + 22)=(BYTE)(tm); *((BYTE*)(dir + 22)+1)=(BYTE)((WORD)(tm)>>8); *((BYTE*)(dir + 22)+2)=(BYTE)((DWORD)(tm)>>16); *((BYTE*)(dir + 22)+3)=(BYTE)((DWORD)(tm)>>24);
+*(BYTE*)(dir + 18)=(BYTE)(0); *((BYTE*)(dir + 18)+1)=(BYTE)((WORD)(0)>>8);
+fp->flag &= ~0x20;
+fp->fs->wflag = 1;
+res = sync_fs(fp->fs);
+}
+}
+}
+
+return res;
+}
+
+# 2949
+FRESULT f_close (
+FIL *fp
+)
+{
+FRESULT res;
+
+
+
+res = f_sync(fp);
+if (res == FR_OK)
+
+{
+res = validate(fp);
+if (res == FR_OK) {
+
+# 2970
+fp->fs = 0;
+
+# 2974
+}
+}
+return res;
+}
+
+# 2988
+FRESULT f_chdrive (
+const TCHAR* path
+)
+{
+int vol;
+
+
+vol = get_ldnumber(&path);
+if (vol < 0) return FR_INVALID_DRIVE;
+
+CurrVol = (BYTE)vol;
+
+return FR_OK;
+}
+
+
+
+FRESULT f_chdir (
+const TCHAR* path
+)
+{
+FRESULT res;
+DIR dj;
+BYTE sfn[12];
+
+
+
+res = find_volume(&dj.fs, &path, 0);
+if (res == FR_OK) {
+(dj).fn = sfn;
+res = follow_path(&dj, path);
+;
+if (res == FR_OK) {
+if (!dj.dir) {
+dj.fs->cdir = dj.sclust;
+} else {
+if (dj.dir[11] & 0x10)
+dj.fs->cdir = ld_clust(dj.fs, dj.dir);
+else
+res = FR_NO_PATH;
+}
+}
+if (res == FR_NO_FILE) res = FR_NO_PATH;
+}
+
+return res;
+}
+
+
+
+FRESULT f_getcwd (
+TCHAR* buff,
+UINT len
+)
+{
+FRESULT res;
+DIR dj;
+UINT i, n;
+DWORD ccl;
+TCHAR *tp;
+FILINFO fno;
+BYTE sfn[12];
+
+
+*buff = 0;
+
+res = find_volume(&dj.fs, (const TCHAR**)&buff, 0);
+if (res == FR_OK) {
+(dj).fn = sfn;
+i = len;
+dj.sclust = dj.fs->cdir;
+while ((ccl = dj.sclust) != 0) {
+res = dir_sdi(&dj, 1);
+if (res != FR_OK) break;
+res = dir_read(&dj, 0);
+if (res != FR_OK) break;
+dj.sclust = ld_clust(dj.fs, dj.dir);
+res = dir_sdi(&dj, 0);
+if (res != FR_OK) break;
+do {
+res = dir_read(&dj, 0);
+if (res != FR_OK) break;
+if (ccl == ld_clust(dj.fs, dj.dir)) break;
+res = dir_next(&dj, 0);
+} while (res == FR_OK);
+if (res == FR_NO_FILE) res = FR_INT_ERR;
+if (res != FR_OK) break;
+
+# 3079
+get_fileinfo(&dj, &fno);
+tp = fno.fname;
+
+# 3084
+for (n = 0; tp[n]; n++) ;
+if (i < n + 3) {
+res = FR_NOT_ENOUGH_CORE; break;
+}
+while (n) buff[--i] = tp[--n];
+buff[--i] = '/';
+}
+tp = buff;
+if (res == FR_OK) {
+
+*tp++ = '0' + CurrVol;
+*tp++ = ':';
+
+if (i == len) {
+*tp++ = '/';
+} else {
+do
+*tp++ = buff[i++];
+while (i < len);
+}
+}
+*tp = 0;
+;
+}
+
+return res;
+}
+
+# 3121
+FRESULT f_lseek (
+FIL* fp,
+DWORD ofs
+)
+{
+FRESULT res;
+DWORD clst, bcs, nsect, ifptr;
+
+DWORD cl, pcl, ncl, tcl, dsc, tlen, ulen, *tbl;
+
+
+
+res = validate(fp);
+if (res != FR_OK) return res;
+if (fp->err)
+return (FRESULT)fp->err;
+
+
+if (fp->cltbl) {
+if (ofs == 0xFFFFFFFF) {
+tbl = fp->cltbl;
+tlen = *tbl++; ulen = 2;
+cl = fp->sclust;
+if (cl) {
+do {
+
+tcl = cl; ncl = 0; ulen += 2;
+do {
+pcl = cl; ncl++;
+cl = get_fat(fp->fs, cl);
+if (cl <= 1) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+if (cl == 0xFFFFFFFF) { fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+} while (cl == pcl + 1);
+if (ulen <= tlen) {
+*tbl++ = ncl; *tbl++ = tcl;
+}
+} while (cl < fp->fs->n_fatent);
+}
+*fp->cltbl = ulen;
+if (ulen <= tlen)
+*tbl = 0;
+else
+res = FR_NOT_ENOUGH_CORE;
+
+} else {
+if (ofs > fp->fsize)
+ofs = fp->fsize;
+fp->fptr = ofs;
+if (ofs) {
+fp->clust = clmt_clust(fp, ofs - 1);
+dsc = clust2sect(fp->fs, fp->clust);
+if (!dsc) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+dsc += (ofs - 1) / ((UINT)512) & (fp->fs->csize - 1);
+if (fp->fptr % ((UINT)512) && dsc != fp->dsect) {
+
+# 3186
+fp->dsect = dsc;
+}
+}
+}
+} else
+
+
+
+{
+if (ofs > fp->fsize
+
+&& !(fp->flag & 0x02)
+
+) ofs = fp->fsize;
+
+ifptr = fp->fptr;
+fp->fptr = nsect = 0;
+if (ofs) {
+bcs = (DWORD)fp->fs->csize * ((UINT)512);
+if (ifptr > 0 &&
+(ofs - 1) / bcs >= (ifptr - 1) / bcs) {
+fp->fptr = (ifptr - 1) & ~(bcs - 1);
+ofs -= fp->fptr;
+clst = fp->clust;
+} else {
+clst = fp->sclust;
+
+if (clst == 0) {
+clst = create_chain(fp->fs, 0);
+if (clst == 1) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+if (clst == 0xFFFFFFFF) { fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+fp->sclust = clst;
+}
+
+fp->clust = clst;
+}
+if (clst != 0) {
+while (ofs > bcs) {
+
+if (fp->flag & 0x02) {
+clst = create_chain(fp->fs, clst);
+if (clst == 0) {
+ofs = bcs; break;
+}
+} else
+
+clst = get_fat(fp->fs, clst);
+if (clst == 0xFFFFFFFF) { fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+if (clst <= 1 || clst >= fp->fs->n_fatent) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+fp->clust = clst;
+fp->fptr += bcs;
+ofs -= bcs;
+}
+fp->fptr += ofs;
+if (ofs % ((UINT)512)) {
+nsect = clust2sect(fp->fs, clst);
+if (!nsect) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+nsect += ofs / ((UINT)512);
+}
+}
+}
+if (fp->fptr % ((UINT)512) && nsect != fp->dsect) {
+
+# 3259
+fp->dsect = nsect;
+}
+
+if (fp->fptr > fp->fsize) {
+fp->fsize = fp->fptr;
+fp->flag |= 0x20;
+}
+
+}
+
+return res;
+}
+
+# 3279
+FRESULT f_opendir (
+DIR* dp,
+const TCHAR* path
+)
+{
+FRESULT res;
+FATFS* fs;
+BYTE sfn[12];
+
+
+if (!dp) return FR_INVALID_OBJECT;
+
+
+res = find_volume(&fs, &path, 0);
+if (res == FR_OK) {
+dp->fs = fs;
+(*dp).fn = sfn;
+res = follow_path(dp, path);
+;
+if (res == FR_OK) {
+if (dp->dir) {
+if (dp->dir[11] & 0x10)
+dp->sclust = ld_clust(fs, dp->dir);
+else
+res = FR_NO_PATH;
+}
+if (res == FR_OK) {
+dp->id = fs->id;
+res = dir_sdi(dp, 0);
+
+# 3319
+}
+}
+if (res == FR_NO_FILE) res = FR_NO_PATH;
+}
+if (res != FR_OK) dp->fs = 0;
+
+return res;
+}
+
+# 3335
+FRESULT f_closedir (
+DIR *dp
+)
+{
+FRESULT res;
+
+
+res = validate(dp);
+if (res == FR_OK) {
+
+# 3352
+dp->fs = 0;
+
+# 3356
+}
+return res;
+}
+
+# 3367
+FRESULT f_readdir (
+DIR* dp,
+FILINFO* fno
+)
+{
+FRESULT res;
+BYTE sfn[12];
+
+
+res = validate(dp);
+if (res == FR_OK) {
+if (!fno) {
+res = dir_sdi(dp, 0);
+} else {
+(*dp).fn = sfn;
+res = dir_read(dp, 0);
+if (res == FR_NO_FILE) {
+dp->sect = 0;
+res = FR_OK;
+}
+if (res == FR_OK) {
+get_fileinfo(dp, fno);
+res = dir_next(dp, 0);
+if (res == FR_NO_FILE) {
+dp->sect = 0;
+res = FR_OK;
+}
+}
+;
+}
+}
+
+return res;
+}
+
+# 3409
+FRESULT f_findnext (
+DIR* dp,
+FILINFO* fno
+)
+{
+FRESULT res;
+
+
+for (;;) {
+res = f_readdir(dp, fno);
+if (res != FR_OK || !fno || !fno->fname[0]) break;
+
+# 3423
+if (pattern_matching(dp->pat, fno->fname, 0, 0)) break;
+}
+return res;
+
+}
+
+# 3435
+FRESULT f_findfirst (
+DIR* dp,
+FILINFO* fno,
+const TCHAR* path,
+const TCHAR* pattern
+)
+{
+FRESULT res;
+
+
+dp->pat = pattern;
+res = f_opendir(dp, path);
+if (res == FR_OK)
+res = f_findnext(dp, fno);
+return res;
+}
+
+# 3461
+FRESULT f_stat (
+const TCHAR* path,
+FILINFO* fno
+)
+{
+FRESULT res;
+DIR dj;
+BYTE sfn[12];
+
+
+
+res = find_volume(&dj.fs, &path, 0);
+if (res == FR_OK) {
+(dj).fn = sfn;
+res = follow_path(&dj, path);
+if (res == FR_OK) {
+if (dj.dir) {
+if (fno) get_fileinfo(&dj, fno);
+} else {
+res = FR_INVALID_NAME;
+}
+}
+;
+}
+
+return res;
+}
+
+# 3496
+FRESULT f_getfree (
+const TCHAR* path,
+DWORD* nclst,
+FATFS** fatfs
+)
+{
+FRESULT res;
+FATFS *fs;
+DWORD nfree, clst, sect, stat;
+UINT i;
+BYTE fat, *p;
+
+
+
+res = find_volume(fatfs, &path, 0);
+fs = *fatfs;
+if (res == FR_OK) {
+
+if (fs->free_clust <= fs->n_fatent - 2) {
+*nclst = fs->free_clust;
+} else {
+
+fat = fs->fs_type;
+nfree = 0;
+if (fat == 1) {
+clst = 2;
+do {
+stat = get_fat(fs, clst);
+if (stat == 0xFFFFFFFF) { res = FR_DISK_ERR; break; }
+if (stat == 1) { res = FR_INT_ERR; break; }
+if (stat == 0) nfree++;
+} while (++clst < fs->n_fatent);
+} else {
+clst = fs->n_fatent; sect = fs->fatbase;
+i = 0; p = 0;
+do {
+if (!i) {
+res = move_window(fs, sect++);
+if (res != FR_OK) break;
+p = fs->win;
+i = ((UINT)512);
+}
+if (fat == 2) {
+if ((WORD)(((WORD)*((BYTE*)(p)+1)<<8)|(WORD)*(BYTE*)(p)) == 0) nfree++;
+p += 2; i -= 2;
+} else {
+if (((DWORD)(((DWORD)*((BYTE*)(p)+3)<<24)|((DWORD)*((BYTE*)(p)+2)<<16)|((WORD)*((BYTE*)(p)+1)<<8)|*(BYTE*)(p)) & 0x0FFFFFFF) == 0) nfree++;
+p += 4; i -= 4;
+}
+} while (--clst);
+}
+fs->free_clust = nfree;
+fs->fsi_flag |= 1;
+*nclst = nfree;
+}
+}
+return res;
+}
+
+# 3562
+FRESULT f_truncate (
+FIL* fp
+)
+{
+FRESULT res;
+DWORD ncl;
+
+
+res = validate(fp);
+if (res == FR_OK) {
+if (fp->err) {
+res = (FRESULT)fp->err;
+} else {
+if (!(fp->flag & 0x02))
+res = FR_DENIED;
+}
+}
+if (res == FR_OK) {
+if (fp->fsize > fp->fptr) {
+fp->fsize = fp->fptr;
+fp->flag |= 0x20;
+if (fp->fptr == 0) {
+res = remove_chain(fp->fs, fp->sclust);
+fp->sclust = 0;
+} else {
+ncl = get_fat(fp->fs, fp->clust);
+res = FR_OK;
+if (ncl == 0xFFFFFFFF) res = FR_DISK_ERR;
+if (ncl == 1) res = FR_INT_ERR;
+if (res == FR_OK && ncl < fp->fs->n_fatent) {
+res = put_fat(fp->fs, fp->clust, 0x0FFFFFFF);
+if (res == FR_OK) res = remove_chain(fp->fs, ncl);
+}
+}
+
+# 3604
+}
+if (res != FR_OK) fp->err = (FRESULT)res;
+}
+
+return res;
+}
+
+# 3618
+FRESULT f_unlink (
+const TCHAR* path
+)
+{
+FRESULT res;
+DIR dj, sdj;
+BYTE *dir;
+DWORD dclst = 0;
+BYTE sfn[12];
+
+
+
+res = find_volume(&dj.fs, &path, 1);
+if (res == FR_OK) {
+(dj).fn = sfn;
+res = follow_path(&dj, path);
+if (2 && res == FR_OK && (dj.fn[11] & 0x20))
+res = FR_INVALID_NAME;
+
+# 3639
+if (res == FR_OK) {
+dir = dj.dir;
+if (!dir) {
+res = FR_INVALID_NAME;
+} else {
+if (dir[11] & 0x01)
+res = FR_DENIED;
+}
+if (res == FR_OK) {
+dclst = ld_clust(dj.fs, dir);
+if (dclst && (dir[11] & 0x10)) {
+
+if (dclst == dj.fs->cdir) {
+res = FR_DENIED;
+} else
+
+{
+mem_cpy(&sdj, &dj, sizeof (DIR));
+sdj.sclust = dclst;
+res = dir_sdi(&sdj, 2);
+if (res == FR_OK) {
+res = dir_read(&sdj, 0);
+if (res == FR_OK) res = FR_DENIED;
+if (res == FR_NO_FILE) res = FR_OK;
+}
+}
+}
+}
+if (res == FR_OK) {
+res = dir_remove(&dj);
+if (res == FR_OK && dclst)
+res = remove_chain(dj.fs, dclst);
+if (res == FR_OK) res = sync_fs(dj.fs);
+}
+}
+;
+}
+
+return res;
+}
+
+# 3687
+FRESULT f_mkdir (
+const TCHAR* path
+)
+{
+FRESULT res;
+DIR dj;
+BYTE *dir, n;
+DWORD dsc, dcl, pcl, tm = ((DWORD)(2016 - 1980) << 25 | (DWORD)7 << 21 | (DWORD)30 << 16);
+BYTE sfn[12];
+
+
+
+res = find_volume(&dj.fs, &path, 1);
+if (res == FR_OK) {
+(dj).fn = sfn;
+res = follow_path(&dj, path);
+if (res == FR_OK) res = FR_EXIST;
+if (2 && res == FR_NO_FILE && (dj.fn[11] & 0x20))
+res = FR_INVALID_NAME;
+if (res == FR_NO_FILE) {
+dcl = create_chain(dj.fs, 0);
+res = FR_OK;
+if (dcl == 0) res = FR_DENIED;
+if (dcl == 1) res = FR_INT_ERR;
+if (dcl == 0xFFFFFFFF) res = FR_DISK_ERR;
+if (res == FR_OK)
+res = sync_window(dj.fs);
+if (res == FR_OK) {
+dsc = clust2sect(dj.fs, dcl);
+dir = dj.fs->win;
+mem_set(dir, 0, ((UINT)512));
+mem_set(dir + 0, ' ', 11);
+dir[0] = '.';
+dir[11] = 0x10;
+*(BYTE*)(dir + 22)=(BYTE)(tm); *((BYTE*)(dir + 22)+1)=(BYTE)((WORD)(tm)>>8); *((BYTE*)(dir + 22)+2)=(BYTE)((DWORD)(tm)>>16); *((BYTE*)(dir + 22)+3)=(BYTE)((DWORD)(tm)>>24);
+st_clust(dir, dcl);
+mem_cpy(dir + 32, dir, 32);
+dir[32 + 1] = '.'; pcl = dj.sclust;
+if (dj.fs->fs_type == 3 && pcl == dj.fs->dirbase)
+pcl = 0;
+st_clust(dir + 32, pcl);
+for (n = dj.fs->csize; n; n--) {
+dj.fs->winsect = dsc++;
+dj.fs->wflag = 1;
+res = sync_window(dj.fs);
+if (res != FR_OK) break;
+mem_set(dir, 0, ((UINT)512));
+}
+}
+if (res == FR_OK) res = dir_register(&dj);
+if (res != FR_OK) {
+remove_chain(dj.fs, dcl);
+} else {
+dir = dj.dir;
+dir[11] = 0x10;
+*(BYTE*)(dir + 22)=(BYTE)(tm); *((BYTE*)(dir + 22)+1)=(BYTE)((WORD)(tm)>>8); *((BYTE*)(dir + 22)+2)=(BYTE)((DWORD)(tm)>>16); *((BYTE*)(dir + 22)+3)=(BYTE)((DWORD)(tm)>>24);
+st_clust(dir, dcl);
+dj.fs->wflag = 1;
+res = sync_fs(dj.fs);
+}
+}
+;
+}
+
+return res;
+}
+
+# 3761
+FRESULT f_chmod (
+const TCHAR* path,
+BYTE attr,
+BYTE mask
+)
+{
+FRESULT res;
+DIR dj;
+BYTE *dir;
+BYTE sfn[12];
+
+
+res = find_volume(&dj.fs, &path, 1);
+if (res == FR_OK) {
+(dj).fn = sfn;
+res = follow_path(&dj, path);
+;
+if (2 && res == FR_OK && (dj.fn[11] & 0x20))
+res = FR_INVALID_NAME;
+if (res == FR_OK) {
+dir = dj.dir;
+if (!dir) {
+res = FR_INVALID_NAME;
+} else {
+mask &= 0x01|0x02|0x04|0x20;
+dir[11] = (attr & mask) | (dir[11] & (BYTE)~mask);
+dj.fs->wflag = 1;
+res = sync_fs(dj.fs);
+}
+}
+}
+
+return res;
+}
+
+# 3803
+FRESULT f_rename (
+const TCHAR* path_old,
+const TCHAR* path_new
+)
+{
+FRESULT res;
+DIR djo, djn;
+BYTE buf[21], *dir;
+DWORD dw;
+BYTE sfn[12];
+
+
+
+res = find_volume(&djo.fs, &path_old, 1);
+if (res == FR_OK) {
+djn.fs = djo.fs;
+(djo).fn = sfn;
+res = follow_path(&djo, path_old);
+if (2 && res == FR_OK && (djo.fn[11] & 0x20))
+res = FR_INVALID_NAME;
+
+# 3826
+if (res == FR_OK) {
+if (!djo.dir) {
+res = FR_NO_FILE;
+} else {
+mem_cpy(buf, djo.dir + 11, 21);
+mem_cpy(&djn, &djo, sizeof (DIR));
+if (get_ldnumber(&path_new) >= 0)
+res = follow_path(&djn, path_new);
+else
+res = FR_INVALID_DRIVE;
+if (res == FR_OK) res = FR_EXIST;
+if (res == FR_NO_FILE) {
+res = dir_register(&djn);
+if (res == FR_OK) {
+
+dir = djn.dir;
+mem_cpy(dir + 13, buf + 2, 19);
+dir[11] = buf[0] | 0x20;
+djo.fs->wflag = 1;
+if ((dir[11] & 0x10) && djo.sclust != djn.sclust) {
+dw = clust2sect(djo.fs, ld_clust(djo.fs, dir));
+if (!dw) {
+res = FR_INT_ERR;
+} else {
+res = move_window(djo.fs, dw);
+dir = djo.fs->win + 32 * 1;
+if (res == FR_OK && dir[1] == '.') {
+st_clust(dir, djn.sclust);
+djo.fs->wflag = 1;
+}
+}
+}
+if (res == FR_OK) {
+res = dir_remove(&djo);
+if (res == FR_OK)
+res = sync_fs(djo.fs);
+}
+
+}
+}
+}
+}
+;
+}
+
+return res;
+}
+
+# 3881
+FRESULT f_utime (
+const TCHAR* path,
+const FILINFO* fno
+)
+{
+FRESULT res;
+DIR dj;
+BYTE *dir;
+BYTE sfn[12];
+
+
+
+res = find_volume(&dj.fs, &path, 1);
+if (res == FR_OK) {
+(dj).fn = sfn;
+res = follow_path(&dj, path);
+;
+if (2 && res == FR_OK && (dj.fn[11] & 0x20))
+res = FR_INVALID_NAME;
+if (res == FR_OK) {
+dir = dj.dir;
+if (!dir) {
+res = FR_INVALID_NAME;
+} else {
+*(BYTE*)(dir + 22)=(BYTE)(fno->ftime); *((BYTE*)(dir + 22)+1)=(BYTE)((WORD)(fno->ftime)>>8);
+*(BYTE*)(dir + 24)=(BYTE)(fno->fdate); *((BYTE*)(dir + 24)+1)=(BYTE)((WORD)(fno->fdate)>>8);
+dj.fs->wflag = 1;
+res = sync_fs(dj.fs);
+}
+}
+}
+
+return res;
+}
+
+# 3929
+FRESULT f_getlabel (
+const TCHAR* path,
+TCHAR* label,
+DWORD* vsn
+)
+{
+FRESULT res;
+DIR dj;
+UINT i, j;
+
+# 3944
+res = find_volume(&dj.fs, &path, 0);
+
+
+if (res == FR_OK && label) {
+dj.sclust = 0;
+res = dir_sdi(&dj, 0);
+if (res == FR_OK) {
+res = dir_read(&dj, 1);
+if (res == FR_OK) {
+
+# 3962
+mem_cpy(label, dj.dir, 11);
+
+j = 11;
+do {
+label[j] = 0;
+if (!j) break;
+} while (label[--j] == ' ');
+}
+if (res == FR_NO_FILE) {
+label[0] = 0;
+res = FR_OK;
+}
+}
+}
+
+
+if (res == FR_OK && vsn) {
+res = move_window(dj.fs, dj.fs->volbase);
+if (res == FR_OK) {
+i = dj.fs->fs_type == 3 ? 67 : 39;
+*vsn = (DWORD)(((DWORD)*((BYTE*)(&dj.fs->win[i])+3)<<24)|((DWORD)*((BYTE*)(&dj.fs->win[i])+2)<<16)|((WORD)*((BYTE*)(&dj.fs->win[i])+1)<<8)|*(BYTE*)(&dj.fs->win[i]));
+}
+}
+
+return res;
+}
+
+# 3996
+FRESULT f_setlabel (
+const TCHAR* label
+)
+{
+FRESULT res;
+DIR dj;
+BYTE vn[11];
+UINT i, j, sl;
+WCHAR w;
+DWORD tm;
+
+
+
+res = find_volume(&dj.fs, &label, 1);
+if (res) return res;
+
+
+vn[0] = 0;
+for (sl = 0; label[sl]; sl++) ;
+for ( ; sl && label[sl - 1] == ' '; sl--) ;
+if (sl) {
+i = j = 0;
+do {
+
+
+
+w = (BYTE)label[i++];
+if ((((BYTE)(w) >= 0x81 && (BYTE)(w) <= 0x9F) || ((BYTE)(w) >= 0xE0 && (BYTE)(w) <= 0xFC)))
+w = (j < 10 && i < sl && (((BYTE)(label[i]) >= 0x40 && (BYTE)(label[i]) <= 0x7E) || ((BYTE)(label[i]) >= 0x80 && (BYTE)(label[i]) <= 0xFC))) ? w << 8 | (BYTE)label[i++] : 0;
+
+
+
+if ((((w)>='a')&&((w)<='z'))) w -= 0x20;
+
+
+
+if (!0x81 && w >= 0x80) w = 0;
+
+
+
+if (!w || chk_chr("\"*+,.:;<=>\?[]|\x7F", w) || j >= (UINT)((w >= 0x100) ? 10 : 11))
+return FR_INVALID_NAME;
+if (w >= 0x100) vn[j++] = (BYTE)(w >> 8);
+vn[j++] = (BYTE)w;
+} while (i < sl);
+while (j < 11) vn[j++] = ' ';
+if (vn[0] == 0xE5) return FR_INVALID_NAME;
+}
+
+
+dj.sclust = 0;
+res = dir_sdi(&dj, 0);
+if (res == FR_OK) {
+res = dir_read(&dj, 1);
+if (res == FR_OK) {
+if (vn[0]) {
+mem_cpy(dj.dir, vn, 11);
+tm = ((DWORD)(2016 - 1980) << 25 | (DWORD)7 << 21 | (DWORD)30 << 16);
+*(BYTE*)(dj.dir + 22)=(BYTE)(tm); *((BYTE*)(dj.dir + 22)+1)=(BYTE)((WORD)(tm)>>8); *((BYTE*)(dj.dir + 22)+2)=(BYTE)((DWORD)(tm)>>16); *((BYTE*)(dj.dir + 22)+3)=(BYTE)((DWORD)(tm)>>24);
+} else {
+dj.dir[0] = 0xE5;
+}
+dj.fs->wflag = 1;
+res = sync_fs(dj.fs);
+} else {
+if (res == FR_NO_FILE) {
+res = FR_OK;
+if (vn[0]) {
+res = dir_alloc(&dj, 1);
+if (res == FR_OK) {
+mem_set(dj.dir, 0, 32);
+mem_cpy(dj.dir, vn, 11);
+dj.dir[11] = 0x08;
+tm = ((DWORD)(2016 - 1980) << 25 | (DWORD)7 << 21 | (DWORD)30 << 16);
+*(BYTE*)(dj.dir + 22)=(BYTE)(tm); *((BYTE*)(dj.dir + 22)+1)=(BYTE)((WORD)(tm)>>8); *((BYTE*)(dj.dir + 22)+2)=(BYTE)((DWORD)(tm)>>16); *((BYTE*)(dj.dir + 22)+3)=(BYTE)((DWORD)(tm)>>24);
+dj.fs->wflag = 1;
+res = sync_fs(dj.fs);
+}
+}
+}
+}
+}
+
+return res;
+}
+
+# 4092
+FRESULT f_forward (
+FIL* fp,
+UINT (*func)(const BYTE*,UINT),
+UINT btf,
+UINT* bf
+)
+{
+FRESULT res;
+DWORD remain, clst, sect;
+UINT rcnt;
+BYTE csect;
+
+
+*bf = 0;
+
+res = validate(fp);
+if (res != FR_OK) return res;
+if (fp->err)
+return (FRESULT)fp->err;
+if (!(fp->flag & 0x01))
+return FR_DENIED;
+
+remain = fp->fsize - fp->fptr;
+if (btf > remain) btf = (UINT)remain;
+
+for ( ; btf && (*func)(0, 0);
+fp->fptr += rcnt, *bf += rcnt, btf -= rcnt) {
+csect = (BYTE)(fp->fptr / ((UINT)512) & (fp->fs->csize - 1));
+if ((fp->fptr % ((UINT)512)) == 0) {
+if (!csect) {
+clst = (fp->fptr == 0) ?
+fp->sclust : get_fat(fp->fs, fp->clust);
+if (clst <= 1) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+if (clst == 0xFFFFFFFF) { fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+fp->clust = clst;
+}
+}
+sect = clust2sect(fp->fs, fp->clust);
+if (!sect) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+sect += csect;
+if (move_window(fp->fs, sect) != FR_OK)
+{ fp->err = (BYTE)(FR_DISK_ERR); return FR_DISK_ERR; };
+fp->dsect = sect;
+rcnt = ((UINT)512) - (WORD)(fp->fptr % ((UINT)512));
+if (rcnt > btf) rcnt = btf;
+rcnt = (*func)(&fp->fs->win[(WORD)fp->fptr % ((UINT)512)], rcnt);
+if (!rcnt) { fp->err = (BYTE)(FR_INT_ERR); return FR_INT_ERR; };
+}
+
+return FR_OK;
+}
+
+# 4155
+FRESULT f_mkfs (
+const TCHAR* path,
+BYTE sfd,
+UINT au
+)
+{
+static const WORD vst[] = { 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 0};
+static const WORD cst[] = {32768, 16384, 8192, 4096, 2048, 16384, 8192, 4096, 2048, 1024, 512};
+int vol;
+BYTE fmt, md, sys, *tbl, pdrv, part;
+DWORD n_clst, vs, n, wsect;
+UINT i;
+DWORD b_vol, b_fat, b_dir, b_data;
+DWORD n_vol, n_rsv, n_fat, n_dir;
+FATFS *fs;
+DSTATUS stat;
+
+DWORD eb[2];
+
+
+
+
+if (sfd > 1) return FR_INVALID_PARAMETER;
+vol = get_ldnumber(&path);
+if (vol < 0) return FR_INVALID_DRIVE;
+fs = FatFs[vol];
+if (!fs) return FR_NOT_ENABLED;
+fs->fs_type = 0;
+pdrv = (BYTE)(vol);
+part = 0;
+
+
+stat = disk_initialize(pdrv);
+if (stat & 0x01) return FR_NOT_READY;
+if (stat & 0x04) return FR_WRITE_PROTECTED;
+
+# 4194
+if (0 && part) {
+
+if (disk_read(pdrv, fs->win, 0, 1) != RES_OK) return FR_DISK_ERR;
+if ((WORD)(((WORD)*((BYTE*)(fs->win + 510)+1)<<8)|(WORD)*(BYTE*)(fs->win + 510)) != 0xAA55) return FR_MKFS_ABORTED;
+tbl = &fs->win[446 + (part - 1) * 16];
+if (!tbl[4]) return FR_MKFS_ABORTED;
+b_vol = (DWORD)(((DWORD)*((BYTE*)(tbl + 8)+3)<<24)|((DWORD)*((BYTE*)(tbl + 8)+2)<<16)|((WORD)*((BYTE*)(tbl + 8)+1)<<8)|*(BYTE*)(tbl + 8));
+n_vol = (DWORD)(((DWORD)*((BYTE*)(tbl + 12)+3)<<24)|((DWORD)*((BYTE*)(tbl + 12)+2)<<16)|((WORD)*((BYTE*)(tbl + 12)+1)<<8)|*(BYTE*)(tbl + 12));
+} else {
+
+if (disk_ioctl(pdrv, 1, &n_vol) != RES_OK || n_vol < 128)
+return FR_DISK_ERR;
+b_vol = (sfd) ? 0 : 63;
+n_vol -= b_vol;
+}
+
+if (au & (au - 1)) au = 0;
+if (!au) {
+vs = n_vol / (2000 / (((UINT)512) / 512));
+for (i = 0; vs < vst[i]; i++) ;
+au = cst[i];
+}
+if (au >= 512) au /= ((UINT)512);
+if (!au) au = 1;
+if (au > 128) au = 128;
+
+
+n_clst = n_vol / au;
+fmt = 1;
+if (n_clst >= 4086U) fmt = 2;
+if (n_clst >= 65526U) fmt = 3;
+
+
+if (fmt == 3) {
+n_fat = ((n_clst * 4) + 8 + ((UINT)512) - 1) / ((UINT)512);
+n_rsv = 32;
+n_dir = 0;
+} else {
+n_fat = (fmt == 1) ? (n_clst * 3 + 1) / 2 + 3 : (n_clst * 2) + 4;
+n_fat = (n_fat + ((UINT)512) - 1) / ((UINT)512);
+n_rsv = 1;
+n_dir = (DWORD)512 * 32 / ((UINT)512);
+}
+b_fat = b_vol + n_rsv;
+b_dir = b_fat + n_fat * 1;
+b_data = b_dir + n_dir;
+if (n_vol < b_data + au - b_vol) return FR_MKFS_ABORTED;
+
+
+if (disk_ioctl(pdrv, 3, &n) != RES_OK || !n || n > 32768) n = 1;
+n = (b_data + n - 1) & ~(n - 1);
+n = (n - b_data) / 1;
+if (fmt == 3) {
+n_rsv += n;
+b_fat += n;
+} else {
+n_fat += n;
+}
+
+
+n_clst = (n_vol - n_rsv - n_fat * 1 - n_dir) / au;
+if ( (fmt == 2 && n_clst < 4086U)
+|| (fmt == 3 && n_clst < 65526U))
+return FR_MKFS_ABORTED;
+
+
+if (fmt == 3) {
+sys = 0x0C;
+} else {
+if (fmt == 1 && n_vol < 0x10000) {
+sys = 0x01;
+} else {
+sys = (n_vol < 0x10000) ? 0x04 : 0x06;
+}
+}
+
+if (0 && part) {
+
+tbl = &fs->win[446 + (part - 1) * 16];
+tbl[4] = sys;
+if (disk_write(pdrv, fs->win, 0, 1) != RES_OK)
+return FR_DISK_ERR;
+md = 0xF8;
+} else {
+if (sfd) {
+md = 0xF0;
+} else {
+mem_set(fs->win, 0, ((UINT)512));
+tbl = fs->win + 446;
+tbl[1] = 1;
+tbl[2] = 1;
+tbl[3] = 0;
+tbl[4] = sys;
+tbl[5] = 254;
+n = (b_vol + n_vol) / 63 / 255;
+tbl[6] = (BYTE)(n >> 2 | 63);
+tbl[7] = (BYTE)n;
+*(BYTE*)(tbl + 8)=(BYTE)(63); *((BYTE*)(tbl + 8)+1)=(BYTE)((WORD)(63)>>8); *((BYTE*)(tbl + 8)+2)=(BYTE)((DWORD)(63)>>16); *((BYTE*)(tbl + 8)+3)=(BYTE)((DWORD)(63)>>24);
+*(BYTE*)(tbl + 12)=(BYTE)(n_vol); *((BYTE*)(tbl + 12)+1)=(BYTE)((WORD)(n_vol)>>8); *((BYTE*)(tbl + 12)+2)=(BYTE)((DWORD)(n_vol)>>16); *((BYTE*)(tbl + 12)+3)=(BYTE)((DWORD)(n_vol)>>24);
+*(BYTE*)(fs->win + 510)=(BYTE)(0xAA55); *((BYTE*)(fs->win + 510)+1)=(BYTE)((WORD)(0xAA55)>>8);
+if (disk_write(pdrv, fs->win, 0, 1) != RES_OK)
+return FR_DISK_ERR;
+md = 0xF8;
+}
+}
+
+
+tbl = fs->win;
+mem_set(tbl, 0, ((UINT)512));
+mem_cpy(tbl, "\xEB\xFE\x90" "MSDOS5.0", 11);
+i = ((UINT)512);
+*(BYTE*)(tbl + 11)=(BYTE)(i); *((BYTE*)(tbl + 11)+1)=(BYTE)((WORD)(i)>>8);
+tbl[13] = (BYTE)au;
+*(BYTE*)(tbl + 14)=(BYTE)(n_rsv); *((BYTE*)(tbl + 14)+1)=(BYTE)((WORD)(n_rsv)>>8);
+tbl[16] = 1;
+i = (fmt == 3) ? 0 : 512;
+*(BYTE*)(tbl + 17)=(BYTE)(i); *((BYTE*)(tbl + 17)+1)=(BYTE)((WORD)(i)>>8);
+if (n_vol < 0x10000) {
+*(BYTE*)(tbl + 19)=(BYTE)(n_vol); *((BYTE*)(tbl + 19)+1)=(BYTE)((WORD)(n_vol)>>8);
+} else {
+*(BYTE*)(tbl + 32)=(BYTE)(n_vol); *((BYTE*)(tbl + 32)+1)=(BYTE)((WORD)(n_vol)>>8); *((BYTE*)(tbl + 32)+2)=(BYTE)((DWORD)(n_vol)>>16); *((BYTE*)(tbl + 32)+3)=(BYTE)((DWORD)(n_vol)>>24);
+}
+tbl[21] = md;
+*(BYTE*)(tbl + 24)=(BYTE)(63); *((BYTE*)(tbl + 24)+1)=(BYTE)((WORD)(63)>>8);
+*(BYTE*)(tbl + 26)=(BYTE)(255); *((BYTE*)(tbl + 26)+1)=(BYTE)((WORD)(255)>>8);
+*(BYTE*)(tbl + 28)=(BYTE)(b_vol); *((BYTE*)(tbl + 28)+1)=(BYTE)((WORD)(b_vol)>>8); *((BYTE*)(tbl + 28)+2)=(BYTE)((DWORD)(b_vol)>>16); *((BYTE*)(tbl + 28)+3)=(BYTE)((DWORD)(b_vol)>>24);
+n = ((DWORD)(2016 - 1980) << 25 | (DWORD)7 << 21 | (DWORD)30 << 16);
+if (fmt == 3) {
+*(BYTE*)(tbl + 67)=(BYTE)(n); *((BYTE*)(tbl + 67)+1)=(BYTE)((WORD)(n)>>8); *((BYTE*)(tbl + 67)+2)=(BYTE)((DWORD)(n)>>16); *((BYTE*)(tbl + 67)+3)=(BYTE)((DWORD)(n)>>24);
+*(BYTE*)(tbl + 36)=(BYTE)(n_fat); *((BYTE*)(tbl + 36)+1)=(BYTE)((WORD)(n_fat)>>8); *((BYTE*)(tbl + 36)+2)=(BYTE)((DWORD)(n_fat)>>16); *((BYTE*)(tbl + 36)+3)=(BYTE)((DWORD)(n_fat)>>24);
+*(BYTE*)(tbl + 44)=(BYTE)(2); *((BYTE*)(tbl + 44)+1)=(BYTE)((WORD)(2)>>8); *((BYTE*)(tbl + 44)+2)=(BYTE)((DWORD)(2)>>16); *((BYTE*)(tbl + 44)+3)=(BYTE)((DWORD)(2)>>24);
+*(BYTE*)(tbl + 48)=(BYTE)(1); *((BYTE*)(tbl + 48)+1)=(BYTE)((WORD)(1)>>8);
+*(BYTE*)(tbl + 50)=(BYTE)(6); *((BYTE*)(tbl + 50)+1)=(BYTE)((WORD)(6)>>8);
+tbl[64] = 0x80;
+tbl[66] = 0x29;
+mem_cpy(tbl + 71, "NO NAME    " "FAT32   ", 19);
+} else {
+*(BYTE*)(tbl + 39)=(BYTE)(n); *((BYTE*)(tbl + 39)+1)=(BYTE)((WORD)(n)>>8); *((BYTE*)(tbl + 39)+2)=(BYTE)((DWORD)(n)>>16); *((BYTE*)(tbl + 39)+3)=(BYTE)((DWORD)(n)>>24);
+*(BYTE*)(tbl + 22)=(BYTE)(n_fat); *((BYTE*)(tbl + 22)+1)=(BYTE)((WORD)(n_fat)>>8);
+tbl[36] = 0x80;
+tbl[38] = 0x29;
+mem_cpy(tbl + 43, "NO NAME    " "FAT     ", 19);
+}
+*(BYTE*)(tbl + 510)=(BYTE)(0xAA55); *((BYTE*)(tbl + 510)+1)=(BYTE)((WORD)(0xAA55)>>8);
+if (disk_write(pdrv, tbl, b_vol, 1) != RES_OK)
+return FR_DISK_ERR;
+if (fmt == 3)
+disk_write(pdrv, tbl, b_vol + 6, 1);
+
+
+wsect = b_fat;
+for (i = 0; i < 1; i++) {
+mem_set(tbl, 0, ((UINT)512));
+n = md;
+if (fmt != 3) {
+n |= (fmt == 1) ? 0x00FFFF00 : 0xFFFFFF00;
+*(BYTE*)(tbl + 0)=(BYTE)(n); *((BYTE*)(tbl + 0)+1)=(BYTE)((WORD)(n)>>8); *((BYTE*)(tbl + 0)+2)=(BYTE)((DWORD)(n)>>16); *((BYTE*)(tbl + 0)+3)=(BYTE)((DWORD)(n)>>24);
+} else {
+n |= 0xFFFFFF00;
+*(BYTE*)(tbl + 0)=(BYTE)(n); *((BYTE*)(tbl + 0)+1)=(BYTE)((WORD)(n)>>8); *((BYTE*)(tbl + 0)+2)=(BYTE)((DWORD)(n)>>16); *((BYTE*)(tbl + 0)+3)=(BYTE)((DWORD)(n)>>24);
+*(BYTE*)(tbl + 4)=(BYTE)(0xFFFFFFFF); *((BYTE*)(tbl + 4)+1)=(BYTE)((WORD)(0xFFFFFFFF)>>8); *((BYTE*)(tbl + 4)+2)=(BYTE)((DWORD)(0xFFFFFFFF)>>16); *((BYTE*)(tbl + 4)+3)=(BYTE)((DWORD)(0xFFFFFFFF)>>24);
+*(BYTE*)(tbl + 8)=(BYTE)(0x0FFFFFFF); *((BYTE*)(tbl + 8)+1)=(BYTE)((WORD)(0x0FFFFFFF)>>8); *((BYTE*)(tbl + 8)+2)=(BYTE)((DWORD)(0x0FFFFFFF)>>16); *((BYTE*)(tbl + 8)+3)=(BYTE)((DWORD)(0x0FFFFFFF)>>24);
+}
+if (disk_write(pdrv, tbl, wsect++, 1) != RES_OK)
+return FR_DISK_ERR;
+mem_set(tbl, 0, ((UINT)512));
+for (n = 1; n < n_fat; n++) {
+if (disk_write(pdrv, tbl, wsect++, 1) != RES_OK)
+return FR_DISK_ERR;
+}
+}
+
+
+i = (fmt == 3) ? au : (UINT)n_dir;
+do {
+if (disk_write(pdrv, tbl, wsect++, 1) != RES_OK)
+return FR_DISK_ERR;
+} while (--i);
+
+
+{
+eb[0] = wsect; eb[1] = wsect + (n_clst - ((fmt == 3) ? 1 : 0)) * au - 1;
+disk_ioctl(pdrv, 4, eb);
+}
+
+
+
+if (fmt == 3) {
+*(BYTE*)(tbl + 0)=(BYTE)(0x41615252); *((BYTE*)(tbl + 0)+1)=(BYTE)((WORD)(0x41615252)>>8); *((BYTE*)(tbl + 0)+2)=(BYTE)((DWORD)(0x41615252)>>16); *((BYTE*)(tbl + 0)+3)=(BYTE)((DWORD)(0x41615252)>>24);
+*(BYTE*)(tbl + 484)=(BYTE)(0x61417272); *((BYTE*)(tbl + 484)+1)=(BYTE)((WORD)(0x61417272)>>8); *((BYTE*)(tbl + 484)+2)=(BYTE)((DWORD)(0x61417272)>>16); *((BYTE*)(tbl + 484)+3)=(BYTE)((DWORD)(0x61417272)>>24);
+*(BYTE*)(tbl + 488)=(BYTE)(n_clst - 1); *((BYTE*)(tbl + 488)+1)=(BYTE)((WORD)(n_clst - 1)>>8); *((BYTE*)(tbl + 488)+2)=(BYTE)((DWORD)(n_clst - 1)>>16); *((BYTE*)(tbl + 488)+3)=(BYTE)((DWORD)(n_clst - 1)>>24);
+*(BYTE*)(tbl + 492)=(BYTE)(2); *((BYTE*)(tbl + 492)+1)=(BYTE)((WORD)(2)>>8); *((BYTE*)(tbl + 492)+2)=(BYTE)((DWORD)(2)>>16); *((BYTE*)(tbl + 492)+3)=(BYTE)((DWORD)(2)>>24);
+*(BYTE*)(tbl + 510)=(BYTE)(0xAA55); *((BYTE*)(tbl + 510)+1)=(BYTE)((WORD)(0xAA55)>>8);
+disk_write(pdrv, tbl, b_vol + 1, 1);
+disk_write(pdrv, tbl, b_vol + 7, 1);
+}
+
+return (disk_ioctl(pdrv, 0, 0) == RES_OK) ? FR_OK : FR_DISK_ERR;
+}
+
+# 4474
+TCHAR* f_gets (
+TCHAR* buff,
+int len,
+FIL* fp
+)
+{
+int n = 0;
+TCHAR c, *p = buff;
+BYTE s[2];
+UINT rc;
+
+
+while (n < len - 1) {
+
+# 4531
+f_read(fp, s, 1, &rc);
+if (rc != 1) break;
+c = s[0];
+
+if (2 == 2 && c == '\r') continue;
+*p++ = c;
+n++;
+if (c == '\n') break;
+}
+*p = 0;
+return n ? buff : 0;
+}
+
+# 7 "C:\Program Files (x86)\Microchip\xc8\v1.33\include\stdarg.h"
+typedef void * va_list[1];
+
+#pragma intrinsic(__va_start)
+extern void * __va_start(void);
+
+#pragma intrinsic(__va_arg)
+extern void * __va_arg(void *, ...);
+
+# 4553 "ff.c"
+typedef struct {
+FIL* fp;
+int idx, nchr;
+BYTE buf[64];
+} putbuff;
+
+
+static
+void putc_bfd (
+putbuff* pb,
+TCHAR c
+)
+{
+UINT bw;
+int i;
+
+
+if (2 == 2 && c == '\n')
+putc_bfd(pb, '\r');
+
+i = pb->idx;
+if (i < 0) return;
+
+# 4603
+pb->buf[i++] = (BYTE)c;
+
+
+if (i >= (int)(sizeof pb->buf) - 3) {
+f_write(pb->fp, pb->buf, (UINT)i, &bw);
+i = (bw == (UINT)i) ? 0 : -1;
+}
+pb->idx = i;
+pb->nchr++;
+}
+
+
+
+int f_putc (
+TCHAR c,
+FIL* fp
+)
+{
+putbuff pb;
+UINT nw;
+
+
+pb.fp = fp;
+pb.nchr = pb.idx = 0;
+
+putc_bfd(&pb, c);
+
+if ( pb.idx >= 0
+&& f_write(pb.fp, pb.buf, (UINT)pb.idx, &nw) == FR_OK
+&& (UINT)pb.idx == nw) return pb.nchr;
+return (-1);
+}
+
+# 4643
+int f_puts (
+const TCHAR* str,
+FIL* fp
+)
+{
+putbuff pb;
+UINT nw;
+
+
+pb.fp = fp;
+pb.nchr = pb.idx = 0;
+
+while (*str)
+putc_bfd(&pb, *str++);
+
+if ( pb.idx >= 0
+&& f_write(pb.fp, pb.buf, (UINT)pb.idx, &nw) == FR_OK
+&& (UINT)pb.idx == nw) return pb.nchr;
+return (-1);
+}
+
+# 4671
+int f_printf (
+FIL* fp,
+const TCHAR* fmt,
+...
+)
+{
+va_list arp;
+BYTE f, r;
+UINT nw, i, j, w;
+DWORD v;
+TCHAR c, d, s[16], *p;
+putbuff pb;
+
+
+pb.fp = fp;
+pb.nchr = pb.idx = 0;
+
+*arp = __va_start();
+
+for (;;) {
+c = *fmt++;
+if (c == 0) break;
+if (c != '%') {
+putc_bfd(&pb, c);
+continue;
+}
+w = f = 0;
+c = *fmt++;
+if (c == '0') {
+f = 1; c = *fmt++;
+} else {
+if (c == '-') {
+f = 2; c = *fmt++;
+}
+}
+while ((((c)>='0')&&((c)<='9'))) {
+w = w * 10 + c - '0';
+c = *fmt++;
+}
+if (c == 'l' || c == 'L') {
+f |= 4; c = *fmt++;
+}
+if (!c) break;
+d = c;
+if ((((d)>='a')&&((d)<='z'))) d -= 0x20;
+switch (d) {
+case 'S' :
+p = (*(TCHAR* *)__va_arg((*(TCHAR* **)arp), (TCHAR*)0));
+for (j = 0; p[j]; j++) ;
+if (!(f & 2)) {
+while (j++ < w) putc_bfd(&pb, ' ');
+}
+while (*p) putc_bfd(&pb, *p++);
+while (j++ < w) putc_bfd(&pb, ' ');
+continue;
+case 'C' :
+putc_bfd(&pb, (TCHAR)(*(int *)__va_arg((*(int **)arp), (int)0))); continue;
+case 'B' :
+r = 2; break;
+case 'O' :
+r = 8; break;
+case 'D' :
+case 'U' :
+r = 10; break;
+case 'X' :
+r = 16; break;
+default:
+putc_bfd(&pb, c); continue;
+}
+
+
+v = (f & 4) ? (DWORD)(*(long *)__va_arg((*(long **)arp), (long)0)) : ((d == 'D') ? (DWORD)(long)(*(int *)__va_arg((*(int **)arp), (int)0)) : (DWORD)(*(unsigned int *)__va_arg((*(unsigned int **)arp), (unsigned int)0)));
+if (d == 'D' && (v & 0x80000000)) {
+v = 0 - v;
+f |= 8;
+}
+i = 0;
+do {
+d = (TCHAR)(v % r); v /= r;
+if (d > 9) d += (c == 'x') ? 0x27 : 0x07;
+s[i++] = d + '0';
+} while (v && i < sizeof s / sizeof s[0]);
+if (f & 8) s[i++] = '-';
+j = i; d = (f & 1) ? '0' : ' ';
+while (!(f & 2) && j++ < w) putc_bfd(&pb, d);
+do putc_bfd(&pb, s[--i]); while (i);
+while (j++ < w) putc_bfd(&pb, d);
+}
+
+;
+
+if ( pb.idx >= 0
+&& f_write(pb.fp, pb.buf, (UINT)pb.idx, &nw) == FR_OK
+&& (UINT)pb.idx == nw) return pb.nchr;
+return (-1);
+}
+

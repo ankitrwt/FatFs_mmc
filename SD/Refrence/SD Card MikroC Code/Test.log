@@ -1,0 +1,12 @@
+0	1	mikroCPIC1618.exe -MSF -DBG -pP18F45K22 -DL -O11111114 -fo8 -N"C:\Documents and Settings\1007805\My Documents\pic flowcode\MikroC\SD Card MikroC Code\Test.mcppi" -SP"C:\Program Files\Mikroelektronika\mikroC PRO for PIC\defs\" -SP"C:\Program Files\Mikroelektronika\mikroC PRO for PIC\uses\P18\" -SP"C:\Documents and Settings\1007805\My Documents\pic flowcode\MikroC\SD Card MikroC Code\" -SP"C:\Documents and Settings\1007805\My Documents\pic flowcode\MikroC\" "Test.c" "__Lib_Math.mcl" "__Lib_MathDouble.mcl" "__Lib_System.mcl" "__Lib_Delays.mcl" "__Lib_CType.mcl" "__Lib_CString.mcl" "__Lib_CStdlib.mcl" "__Lib_CMath.mcl" "__Lib_Conversions.mcl" "__Lib_Sprinti.mcl" "__Lib_Sprintl.mcl" "__Lib_SoftSPI.mcl" "__Lib_SPI_c345d014.mcl" "__Lib_UART_c67d67.mcl" "__Lib_LcdConsts.mcl" "__Lib_Lcd.mcl" "__Lib_Mmc.mcl" "__Lib_MmcFat16.mcl"	 
+hint: 0	1139	Available RAM: 1515 [bytes], Available ROM: 32768 [bytes]	 
+diagnostics: 0	126	All files Preprocessed in 16 ms	 
+diagnostics: 0	122	Compilation Started	Test.c
+diagnostics: 45	123	Compiled Successfully	Test.c
+diagnostics: 0	127	All files Compiled in 62 ms	 
+hint: 0	1144	Used RAM (bytes): 676 (45%)  Free RAM (bytes): 839 (55%)	Used RAM (bytes): 676 (45%)  Free RAM (bytes): 839 (55%)
+hint: 0	1144	Used ROM (bytes): 9004 (27%)  Free ROM (bytes): 23764 (73%)	Used ROM (bytes): 9004 (27%)  Free ROM (bytes): 23764 (73%)
+diagnostics: 0	125	Project Linked Successfully	Test.mcppi
+diagnostics: 0	128	Linked in 157 ms	 
+diagnostics: 0	129	Project 'Test.mcppi' completed: 297 ms	 
+diagnostics: 0	103	Finished successfully: 10 Jul 2013, 21:15:15	Test.mcppi

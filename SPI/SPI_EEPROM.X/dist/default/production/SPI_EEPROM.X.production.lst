@@ -1,0 +1,2383 @@
+
+
+HI-TECH Software PIC LITE Macro Assembler V9.81 build 7503 
+                                                                                               Sun May 01 01:22:36 2016
+
+HI-TECH Software Omniscient Code Generator (Lite mode) build 7503
+     1  0000                     opt subtitle "HI-TECH Software Omniscient Code Generator (Lite mode) build 7503"
+     2                           
+     3                           opt pagewidth 120
+     4                           
+     5                           	opt lm
+     6                           
+     7                           	processor	16F887
+     8                           clrc	macro
+     9                           	bcf	3,0
+    10  0000                     	endm
+    11                           clrz	macro
+    12                           	bcf	3,2
+    13  0000                     	endm
+    14                           setc	macro
+    15                           	bsf	3,0
+    16  0000                     	endm
+    17                           setz	macro
+    18                           	bsf	3,2
+    19  0000                     	endm
+    20                           skipc	macro
+    21                           	btfss	3,0
+    22  0000                     	endm
+    23                           skipz	macro
+    24                           	btfss	3,2
+    25  0000                     	endm
+    26                           skipnc	macro
+    27                           	btfsc	3,0
+    28  0000                     	endm
+    29                           skipnz	macro
+    30                           	btfsc	3,2
+    31  0000                     	endm
+    32  0000                     indf	equ	0
+    33  0000                     indf0	equ	0
+    34  0002                     pc	equ	2
+    35  0002                     pcl	equ	2
+    36  0003                     status	equ	3
+    37  0004                     fsr	equ	4
+    38  0004                     fsr0	equ	4
+    39  0001                     c	equ	1
+    40  0000                     z	equ	0
+    41  000A                     pclath	equ	10
+    42                           	FNCALL	_main,_init
+    43                           	FNCALL	_main,_LCD_init
+    44                           	FNCALL	_main,_Write_Byte
+    45                           	FNCALL	_main,_delay
+    46                           	FNCALL	_main,_Read_Byte
+    47                           	FNCALL	_main,_LCD_func
+    48                           	FNCALL	_Write_Byte,_Write_Enable
+    49                           	FNCALL	_Write_Byte,_Read_Status
+    50                           	FNCALL	_Write_Byte,_Write_Status
+    51                           	FNCALL	_Write_Byte,_SPI_delay
+    52                           	FNCALL	_Write_Byte,_Send_8Bits
+    53                           	FNCALL	_LCD_init,_LCD_func
+    54                           	FNCALL	_Write_Status,_SPI_delay
+    55                           	FNCALL	_Write_Status,_Send_8Bits
+    56                           	FNCALL	_Read_Status,_SPI_delay
+    57                           	FNCALL	_Read_Status,_Send_8Bits
+    58                           	FNCALL	_Read_Status,_Read_8Bits
+    59                           	FNCALL	_Write_Enable,_SPI_delay
+    60                           	FNCALL	_Write_Enable,_Send_8Bits
+    61                           	FNCALL	_LCD_func,_LCD_enable
+    62                           	FNCALL	_Read_Byte,_SPI_delay
+    63                           	FNCALL	_Read_Byte,_Send_8Bits
+    64                           	FNCALL	_Read_Byte,_Read_8Bits
+    65                           	FNCALL	_Send_8Bits,_SPI_delay
+    66                           	FNCALL	_Read_8Bits,_SPI_delay
+    67                           	FNCALL	_LCD_enable,_LCD_delay
+    68                           	FNROOT	_main
+    69                           	global	_PORTD
+    70                           psect	text317,local,class=CODE,delta=2
+    71                           global __ptext317
+    72  0000                     __ptext317:
+    73  0008                     _PORTD	set	8
+    74                           	global	_RC2
+    75  003A                     _RC2	set	58
+    76                           	global	_RC3
+    77  003B                     _RC3	set	59
+    78                           	global	_RC4
+    79  003C                     _RC4	set	60
+    80                           	global	_RC5
+    81  003D                     _RC5	set	61
+    82                           	global	_RC6
+    83  003E                     _RC6	set	62
+    84                           	global	_RD4
+    85  0044                     _RD4	set	68
+    86                           	global	_RD5
+    87  0045                     _RD5	set	69
+    88                           	global	_TRISC
+    89  0087                     _TRISC	set	135
+    90                           	global	_TRISD
+    91  0088                     _TRISD	set	136
+    92                           	file	"C:\Users\Ankit\AppData\Local\Temp\s658."
+    93                           	line	#
+    94                           psect cinit,class=CODE,delta=2
+    95                           global start_initialization
+    96  04CE                     start_initialization:
+    97                           
+    98                           psect cinit,class=CODE,delta=2
+    99                           global end_of_initialization
+   100                           
+   101                           ;End of C runtime variable initialization code
+   102                           
+   103  04CE                     end_of_initialization:
+   104  04CE  0183               clrf status
+   105  04CF  120A  118A  2F90   ljmp _main	;jump to C main() function
+   106                           psect	cstackCOMMON,class=COMMON,space=1
+   107                           global __pcstackCOMMON
+   108  0070                     __pcstackCOMMON:
+   109                           	global	?_LCD_init
+   110  0070                     ?_LCD_init:	; 0 bytes @ 0x0
+   111                           	global	?_delay
+   112  0070                     ?_delay:	; 0 bytes @ 0x0
+   113                           	global	?_init
+   114  0070                     ?_init:	; 0 bytes @ 0x0
+   115                           	global	??_init
+   116  0070                     ??_init:	; 0 bytes @ 0x0
+   117                           	global	?_LCD_delay
+   118  0070                     ?_LCD_delay:	; 0 bytes @ 0x0
+   119                           	global	?_LCD_enable
+   120  0070                     ?_LCD_enable:	; 0 bytes @ 0x0
+   121                           	global	?_SPI_delay
+   122  0070                     ?_SPI_delay:	; 0 bytes @ 0x0
+   123                           	global	?_Send_8Bits
+   124  0070                     ?_Send_8Bits:	; 0 bytes @ 0x0
+   125                           	global	?_Write_Enable
+   126  0070                     ?_Write_Enable:	; 0 bytes @ 0x0
+   127                           	global	?_Write_Status
+   128  0070                     ?_Write_Status:	; 0 bytes @ 0x0
+   129                           	global	?_Read_Byte
+   130  0070                     ?_Read_Byte:	; 1 bytes @ 0x0
+   131                           	global	?_Read_8Bits
+   132  0070                     ?_Read_8Bits:	; 1 bytes @ 0x0
+   133                           	global	?_Read_Status
+   134  0070                     ?_Read_Status:	; 1 bytes @ 0x0
+   135                           	global	LCD_delay@x
+   136  0070                     LCD_delay@x:	; 2 bytes @ 0x0
+   137                           	global	SPI_delay@x
+   138  0070                     SPI_delay@x:	; 2 bytes @ 0x0
+   139                           	global	delay@x
+   140  0070                     delay@x:	; 4 bytes @ 0x0
+   141  0070                     	ds	2
+   142                           	global	??_LCD_delay
+   143  0072                     ??_LCD_delay:	; 0 bytes @ 0x2
+   144                           	global	??_LCD_enable
+   145  0072                     ??_LCD_enable:	; 0 bytes @ 0x2
+   146                           	global	??_SPI_delay
+   147  0072                     ??_SPI_delay:	; 0 bytes @ 0x2
+   148                           	global	??_Read_8Bits
+   149  0072                     ??_Read_8Bits:	; 0 bytes @ 0x2
+   150                           	global	??_Send_8Bits
+   151  0072                     ??_Send_8Bits:	; 0 bytes @ 0x2
+   152  0072                     	ds	2
+   153                           	global	??_delay
+   154  0074                     ??_delay:	; 0 bytes @ 0x4
+   155                           	global	Read_8Bits@i
+   156  0074                     Read_8Bits@i:	; 1 bytes @ 0x4
+   157                           	global	Send_8Bits@data
+   158  0074                     Send_8Bits@data:	; 1 bytes @ 0x4
+   159  0074                     	ds	1
+   160                           	global	Read_8Bits@temp
+   161  0075                     Read_8Bits@temp:	; 1 bytes @ 0x5
+   162                           	global	Send_8Bits@temp
+   163  0075                     Send_8Bits@temp:	; 1 bytes @ 0x5
+   164  0075                     	ds	1
+   165                           	global	Send_8Bits@i
+   166  0076                     Send_8Bits@i:	; 1 bytes @ 0x6
+   167  0076                     	ds	1
+   168                           	global	??_Read_Byte
+   169  0077                     ??_Read_Byte:	; 0 bytes @ 0x7
+   170                           	global	??_Write_Enable
+   171  0077                     ??_Write_Enable:	; 0 bytes @ 0x7
+   172                           	global	??_Read_Status
+   173  0077                     ??_Read_Status:	; 0 bytes @ 0x7
+   174                           	global	??_Write_Status
+   175  0077                     ??_Write_Status:	; 0 bytes @ 0x7
+   176                           	global	Write_Status@data
+   177  0077                     Write_Status@data:	; 1 bytes @ 0x7
+   178  0077                     	ds	1
+   179                           	global	Read_Status@temp
+   180  0078                     Read_Status@temp:	; 1 bytes @ 0x8
+   181                           	global	Read_Byte@address
+   182  0078                     Read_Byte@address:	; 1 bytes @ 0x8
+   183  0078                     	ds	1
+   184                           	global	?_Write_Byte
+   185  0079                     ?_Write_Byte:	; 0 bytes @ 0x9
+   186                           	global	Write_Byte@address
+   187  0079                     Write_Byte@address:	; 1 bytes @ 0x9
+   188                           	global	Read_Byte@temp
+   189  0079                     Read_Byte@temp:	; 1 bytes @ 0x9
+   190  0079                     	ds	1
+   191                           	global	??_Write_Byte
+   192  007A                     ??_Write_Byte:	; 0 bytes @ 0xA
+   193                           	global	?_LCD_func
+   194  007A                     ?_LCD_func:	; 0 bytes @ 0xA
+   195                           	global	LCD_func@cmd
+   196  007A                     LCD_func@cmd:	; 1 bytes @ 0xA
+   197  007A                     	ds	1
+   198                           	global	??_LCD_func
+   199  007B                     ??_LCD_func:	; 0 bytes @ 0xB
+   200                           	global	Write_Byte@data
+   201  007B                     Write_Byte@data:	; 1 bytes @ 0xB
+   202  007B                     	ds	1
+   203                           	global	LCD_func@data
+   204  007C                     LCD_func@data:	; 1 bytes @ 0xC
+   205  007C                     	ds	1
+   206                           	global	??_LCD_init
+   207  007D                     ??_LCD_init:	; 0 bytes @ 0xD
+   208                           	global	??_main
+   209  007D                     ??_main:	; 0 bytes @ 0xD
+   210  007D                     	ds	1
+   211                           psect	cstackBANK0,class=BANK0,space=1
+   212                           global __pcstackBANK0
+   213  0020                     __pcstackBANK0:
+   214                           	global	?_main
+   215  0020                     ?_main:	; 2 bytes @ 0x0
+   216                           	global	main@argc
+   217  0020                     main@argc:	; 2 bytes @ 0x0
+   218  0020                     	ds	2
+   219                           	global	main@argv
+   220  0022                     main@argv:	; 2 bytes @ 0x2
+   221  0022                     	ds	2
+   222 ;;Data sizes: Strings 0, constant 0, data 0, bss 0, persistent 0 stack 0
+   223 ;;Auto spaces:   Size  Autos    Used
+   224 ;; COMMON          14     14      14
+   225 ;; BANK0           80      4       4
+   226 ;; BANK1           80      0       0
+   227 ;; BANK3           96      0       0
+   228 ;; BANK2           96      0       0
+   229                           
+   230 ;;
+   231 ;; Pointer list with targets:
+   232                           
+   233                           
+   234                           
+   235 ;;
+   236 ;; Critical Paths under _main in COMMON
+   237 ;;
+   238 ;;   _main->_LCD_func
+   239 ;;   _Write_Byte->_Read_Status
+   240 ;;   _LCD_init->_LCD_func
+   241 ;;   _Write_Status->_Send_8Bits
+   242 ;;   _Read_Status->_Send_8Bits
+   243 ;;   _Write_Enable->_Send_8Bits
+   244 ;;   _LCD_func->_Read_Byte
+   245 ;;   _Read_Byte->_Send_8Bits
+   246 ;;   _Send_8Bits->_SPI_delay
+   247 ;;   _Read_8Bits->_SPI_delay
+   248 ;;   _LCD_enable->_LCD_delay
+   249 ;;
+   250 ;; Critical Paths under _main in BANK0
+   251 ;;
+   252 ;;   None.
+   253 ;;
+   254 ;; Critical Paths under _main in BANK1
+   255 ;;
+   256 ;;   None.
+   257 ;;
+   258 ;; Critical Paths under _main in BANK3
+   259 ;;
+   260 ;;   None.
+   261 ;;
+   262 ;; Critical Paths under _main in BANK2
+   263 ;;
+   264 ;;   None.
+   265                           
+   266 ;;
+   267 ;;Main: autosize = 0, tempsize = 1, incstack = 0, save=0
+   268 ;;
+   269                           
+   270 ;;
+   271 ;;Call Graph Tables:
+   272 ;;
+   273 ;; ---------------------------------------------------------------------------------
+   274 ;; (Depth) Function   	        Calls       Base Space   Used Autos Params    Refs
+   275 ;; ---------------------------------------------------------------------------------
+   276 ;; (0) _main                                                 5     1      4     930
+   277 ;;                                             13 COMMON     1     1      0
+   278 ;;                                              0 BANK0      4     0      4
+   279 ;;                               _init
+   280 ;;                           _LCD_init
+   281 ;;                         _Write_Byte
+   282 ;;                              _delay
+   283 ;;                          _Read_Byte
+   284 ;;                           _LCD_func
+   285 ;; ---------------------------------------------------------------------------------
+   286 ;; (1) _Write_Byte                                           3     2      1     570
+   287 ;;                                              9 COMMON     3     2      1
+   288 ;;                       _Write_Enable
+   289 ;;                        _Read_Status
+   290 ;;                       _Write_Status
+   291 ;;                          _SPI_delay
+   292 ;;                         _Send_8Bits
+   293 ;; ---------------------------------------------------------------------------------
+   294 ;; (1) _LCD_init                                             0     0      0      60
+   295 ;;                           _LCD_func
+   296 ;; ---------------------------------------------------------------------------------
+   297 ;; (2) _Write_Status                                         1     1      0     120
+   298 ;;                                              7 COMMON     1     1      0
+   299 ;;                          _SPI_delay
+   300 ;;                         _Send_8Bits
+   301 ;; ---------------------------------------------------------------------------------
+   302 ;; (2) _Read_Status                                          2     2      0     210
+   303 ;;                                              7 COMMON     2     2      0
+   304 ;;                          _SPI_delay
+   305 ;;                         _Send_8Bits
+   306 ;;                         _Read_8Bits
+   307 ;; ---------------------------------------------------------------------------------
+   308 ;; (2) _Write_Enable                                         0     0      0     105
+   309 ;;                          _SPI_delay
+   310 ;;                         _Send_8Bits
+   311 ;; ---------------------------------------------------------------------------------
+   312 ;; (1) _LCD_func                                             3     2      1      60
+   313 ;;                                             10 COMMON     3     2      1
+   314 ;;                         _LCD_enable
+   315 ;;                          _Read_Byte (ARG)
+   316 ;; ---------------------------------------------------------------------------------
+   317 ;; (1) _Read_Byte                                            3     3      0     225
+   318 ;;                                              7 COMMON     3     3      0
+   319 ;;                          _SPI_delay
+   320 ;;                         _Send_8Bits
+   321 ;;                         _Read_8Bits
+   322 ;; ---------------------------------------------------------------------------------
+   323 ;; (2) _Send_8Bits                                           5     5      0      90
+   324 ;;                                              2 COMMON     5     5      0
+   325 ;;                          _SPI_delay
+   326 ;; ---------------------------------------------------------------------------------
+   327 ;; (2) _Read_8Bits                                           4     4      0      90
+   328 ;;                                              2 COMMON     4     4      0
+   329 ;;                          _SPI_delay
+   330 ;; ---------------------------------------------------------------------------------
+   331 ;; (2) _LCD_enable                                           0     0      0      15
+   332 ;;                          _LCD_delay
+   333 ;; ---------------------------------------------------------------------------------
+   334 ;; (3) _SPI_delay                                            2     0      2      15
+   335 ;;                                              0 COMMON     2     0      2
+   336 ;; ---------------------------------------------------------------------------------
+   337 ;; (3) _LCD_delay                                            2     0      2      15
+   338 ;;                                              0 COMMON     2     0      2
+   339 ;; ---------------------------------------------------------------------------------
+   340 ;; (1) _init                                                 0     0      0       0
+   341 ;; ---------------------------------------------------------------------------------
+   342 ;; (1) _delay                                                8     4      4      15
+   343 ;;                                              0 COMMON     8     4      4
+   344 ;; ---------------------------------------------------------------------------------
+   345 ;; Estimated maximum stack depth 3
+   346 ;; ---------------------------------------------------------------------------------
+   347                           
+   348 ;; Call Graph Graphs:
+   349                           
+   350 ;; _main (ROOT)
+   351 ;;   _init
+   352 ;;   _LCD_init
+   353 ;;     _LCD_func
+   354 ;;       _LCD_enable
+   355 ;;         _LCD_delay
+   356 ;;       _Read_Byte (ARG)
+   357 ;;         _SPI_delay
+   358 ;;         _Send_8Bits
+   359 ;;           _SPI_delay
+   360 ;;         _Read_8Bits
+   361 ;;           _SPI_delay
+   362 ;;   _Write_Byte
+   363 ;;     _Write_Enable
+   364 ;;       _SPI_delay
+   365 ;;       _Send_8Bits
+   366 ;;         _SPI_delay
+   367 ;;     _Read_Status
+   368 ;;       _SPI_delay
+   369 ;;       _Send_8Bits
+   370 ;;         _SPI_delay
+   371 ;;       _Read_8Bits
+   372 ;;         _SPI_delay
+   373 ;;     _Write_Status
+   374 ;;       _SPI_delay
+   375 ;;       _Send_8Bits
+   376 ;;         _SPI_delay
+   377 ;;     _SPI_delay
+   378 ;;     _Send_8Bits
+   379 ;;       _SPI_delay
+   380 ;;   _delay
+   381 ;;   _Read_Byte
+   382 ;;     _SPI_delay
+   383 ;;     _Send_8Bits
+   384 ;;       _SPI_delay
+   385 ;;     _Read_8Bits
+   386 ;;       _SPI_delay
+   387 ;;   _LCD_func
+   388 ;;     _LCD_enable
+   389 ;;       _LCD_delay
+   390 ;;     _Read_Byte (ARG)
+   391 ;;       _SPI_delay
+   392 ;;       _Send_8Bits
+   393 ;;         _SPI_delay
+   394 ;;       _Read_8Bits
+   395 ;;         _SPI_delay
+   396 ;;
+   397                           
+   398 ;; Address spaces:
+   399                           
+   400 ;;Name               Size   Autos  Total    Cost      Usage
+   401 ;;BITCOMMON            E      0       0       0        0.0%
+   402 ;;EEDATA             100      0       0       0        0.0%
+   403 ;;NULL                 0      0       0       0        0.0%
+   404 ;;CODE                 0      0       0       0        0.0%
+   405 ;;COMMON               E      E       E       1      100.0%
+   406 ;;BITSFR0              0      0       0       1        0.0%
+   407 ;;SFR0                 0      0       0       1        0.0%
+   408 ;;BITSFR1              0      0       0       2        0.0%
+   409 ;;SFR1                 0      0       0       2        0.0%
+   410 ;;STACK                0      0       4       2        0.0%
+   411 ;;ABS                  0      0       0       3        0.0%
+   412 ;;BITBANK0            50      0       0       4        0.0%
+   413 ;;BITSFR3              0      0       0       4        0.0%
+   414 ;;SFR3                 0      0       0       4        0.0%
+   415 ;;BANK0               50      4       4       5        5.0%
+   416 ;;BITSFR2              0      0       0       5        0.0%
+   417 ;;SFR2                 0      0       0       5        0.0%
+   418 ;;BITBANK1            50      0       0       6        0.0%
+   419 ;;BANK1               50      0       0       7        0.0%
+   420 ;;BITBANK3            60      0       0       8        0.0%
+   421 ;;BANK3               60      0       0       9        0.0%
+   422 ;;BITBANK2            60      0       0      10        0.0%
+   423 ;;BANK2               60      0       0      11        0.0%
+   424 ;;DATA                 0      0       0      12        0.0%
+   425                           
+   426                           	global	_main
+   427                           psect	maintext,global,class=CODE,delta=2
+   428                           global __pmaintext
+   429  0790                     __pmaintext:
+   430                           
+   431 ;; *************** function _main *****************
+   432 ;; Defined at:
+   433 ;;		line 25 in file "main.c"
+   434 ;; Parameters:    Size  Location     Type
+   435 ;;  argc            2    0[BANK0 ] int 
+   436 ;;  argv            2    2[BANK0 ] PTR PTR unsigned char 
+   437 ;; Auto vars:     Size  Location     Type
+   438 ;;		None
+   439 ;; Return value:  Size  Location     Type
+   440 ;;                  2    0[BANK0 ] int 
+   441 ;; Registers used:
+   442 ;;		wreg, status,2, status,0, pclath, cstack
+   443 ;; Tracked objects:
+   444 ;;		On entry : 17F/0
+   445 ;;		On exit  : 0/0
+   446 ;;		Unchanged: 0/0
+   447 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+   448 ;;      Params:         0       4       0       0       0
+   449 ;;      Locals:         0       0       0       0       0
+   450 ;;      Temps:          1       0       0       0       0
+   451 ;;      Totals:         1       4       0       0       0
+   452 ;;Total ram usage:        5 bytes
+   453 ;; Hardware stack levels required when called:    4
+   454 ;; This function calls:
+   455 ;;		_init
+   456 ;;		_LCD_init
+   457 ;;		_Write_Byte
+   458 ;;		_delay
+   459 ;;		_Read_Byte
+   460 ;;		_LCD_func
+   461 ;; This function is called by:
+   462 ;;		Startup code after reset
+   463 ;; This function uses a non-reentrant model
+   464 ;;
+   465                           psect	maintext
+   466                           	file	"main.c"
+   467                           	line	25
+   468                           	global	__size_of_main
+   469  0070                     	__size_of_main	equ	__end_of_main-_main
+   470                           	
+   471  0790                     _main:	
+   472                           	opt	stack 4
+   473                           ; Regs used in _main: [wreg+status,2+status,0+pclath+cstack]
+   474                           	line	26
+   475                           	
+   476  0790                     l4444:	
+   477                           ;main.c: 26: init();
+   478  0790  120A  118A  24D2   	fcall	_init
+              120A  118A         
+   479                           	line	27
+   480                           ;main.c: 27: LCD_init();
+   481  0795  120A  118A  256C   	fcall	_LCD_init
+              120A  118A         
+   482                           	line	29
+   483                           ;main.c: 29: Write_Byte('A',21);delay(500);
+   484  079A  3015               	movlw	(015h)
+   485  079B  00FD               	movwf	(??_main+0)+0
+   486  079C  087D               	movf	(??_main+0)+0,w
+   487  079D  00F9               	movwf	(?_Write_Byte)
+   488  079E  3041               	movlw	(041h)
+   489  079F  120A  118A  2725   	fcall	_Write_Byte
+              120A  118A         
+   490  07A4  3000               	movlw	0
+   491  07A5  00F3               	movwf	(?_delay+3)
+   492  07A6  3000               	movlw	0
+   493  07A7  00F2               	movwf	(?_delay+2)
+   494  07A8  3001               	movlw	01h
+   495  07A9  00F1               	movwf	(?_delay+1)
+   496  07AA  30F4               	movlw	0F4h
+   497  07AB  00F0               	movwf	(?_delay)
+   498                           
+   499  07AC  120A  118A  2597   	fcall	_delay
+              120A  118A         
+   500                           	line	30
+   501                           ;main.c: 30: Write_Byte('N',22);delay(500);
+   502  07B1  3016               	movlw	(016h)
+   503  07B2  00FD               	movwf	(??_main+0)+0
+   504  07B3  087D               	movf	(??_main+0)+0,w
+   505  07B4  00F9               	movwf	(?_Write_Byte)
+   506  07B5  304E               	movlw	(04Eh)
+   507  07B6  120A  118A  2725   	fcall	_Write_Byte
+              120A  118A         
+   508  07BB  3000               	movlw	0
+   509  07BC  00F3               	movwf	(?_delay+3)
+   510  07BD  3000               	movlw	0
+   511  07BE  00F2               	movwf	(?_delay+2)
+   512  07BF  3001               	movlw	01h
+   513  07C0  00F1               	movwf	(?_delay+1)
+   514  07C1  30F4               	movlw	0F4h
+   515  07C2  00F0               	movwf	(?_delay)
+   516                           
+   517  07C3  120A  118A  2597   	fcall	_delay
+              120A  118A         
+   518                           	line	31
+   519                           ;main.c: 31: Write_Byte('K',23);
+   520  07C8  3017               	movlw	(017h)
+   521  07C9  00FD               	movwf	(??_main+0)+0
+   522  07CA  087D               	movf	(??_main+0)+0,w
+   523  07CB  00F9               	movwf	(?_Write_Byte)
+   524  07CC  304B               	movlw	(04Bh)
+   525  07CD  120A  118A  2725   	fcall	_Write_Byte
+              120A  118A         
+   526                           	line	35
+   527                           ;main.c: 35: while(1){
+   528                           	
+   529  07D2                     l1042:	
+   530                           	line	36
+   531                           ;main.c: 36: LCD_func(Read_Byte(21),1);
+   532  07D2  01FA               	clrf	(?_LCD_func)
+   533  07D3  1403               	bsf	status,0
+   534  07D4  0DFA               	rlf	(?_LCD_func),f
+   535  07D5  3015               	movlw	(015h)
+   536  07D6  120A  118A  2684   	fcall	_Read_Byte
+              120A  118A         
+   537  07DB  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   538                           	line	37
+   539                           ;main.c: 37: LCD_func(Read_Byte(22),1);
+   540  07E0  01FA               	clrf	(?_LCD_func)
+   541  07E1  1403               	bsf	status,0
+   542  07E2  0DFA               	rlf	(?_LCD_func),f
+   543  07E3  3016               	movlw	(016h)
+   544  07E4  120A  118A  2684   	fcall	_Read_Byte
+              120A  118A         
+   545  07E9  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   546                           	line	43
+   547                           ;main.c: 43: delay(500000);
+   548  07EE  3000               	movlw	0
+   549  07EF  00F3               	movwf	(?_delay+3)
+   550  07F0  3007               	movlw	07h
+   551  07F1  00F2               	movwf	(?_delay+2)
+   552  07F2  30A1               	movlw	0A1h
+   553  07F3  00F1               	movwf	(?_delay+1)
+   554  07F4  3020               	movlw	020h
+   555  07F5  00F0               	movwf	(?_delay)
+   556                           
+   557  07F6  120A  118A  2597   	fcall	_delay
+              120A  118A         
+   558  07FB  2FD2               	goto	l1042
+   559                           	line	44
+   560                           	
+   561  07FC                     l1043:	
+   562                           	line	35
+   563  07FC  2FD2               	goto	l1042
+   564                           	
+   565  07FD                     l1044:	
+   566                           	line	47
+   567                           ;main.c: 44: }
+   568                           ;main.c: 46: return (0);
+   569                           ;	Return value of _main is never used
+   570                           	
+   571  07FD                     l1045:	
+   572                           	global	start
+   573  07FD  120A  118A  2800   	ljmp	start
+   574                           	opt stack 0
+   575                           GLOBAL	__end_of_main
+   576  0800                     	__end_of_main:
+   577 ;; =============== function _main ends ============
+   578                           
+   579                           	signat	_main,8314
+   580                           	global	_Write_Byte
+   581                           psect	text318,local,class=CODE,delta=2
+   582                           global __ptext318
+   583  0725                     __ptext318:
+   584                           
+   585 ;; *************** function _Write_Byte *****************
+   586 ;; Defined at:
+   587 ;;		line 129 in file "SPI.c"
+   588 ;; Parameters:    Size  Location     Type
+   589 ;;  data            1    wreg     unsigned char 
+   590 ;;  address         1    9[COMMON] unsigned char 
+   591 ;; Auto vars:     Size  Location     Type
+   592 ;;  data            1   11[COMMON] unsigned char 
+   593 ;; Return value:  Size  Location     Type
+   594 ;;		None               void
+   595 ;; Registers used:
+   596 ;;		wreg, status,2, status,0, pclath, cstack
+   597 ;; Tracked objects:
+   598 ;;		On entry : 0/0
+   599 ;;		On exit  : 0/0
+   600 ;;		Unchanged: 0/0
+   601 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+   602 ;;      Params:         1       0       0       0       0
+   603 ;;      Locals:         1       0       0       0       0
+   604 ;;      Temps:          1       0       0       0       0
+   605 ;;      Totals:         3       0       0       0       0
+   606 ;;Total ram usage:        3 bytes
+   607 ;; Hardware stack levels used:    1
+   608 ;; Hardware stack levels required when called:    3
+   609 ;; This function calls:
+   610 ;;		_Write_Enable
+   611 ;;		_Read_Status
+   612 ;;		_Write_Status
+   613 ;;		_SPI_delay
+   614 ;;		_Send_8Bits
+   615 ;; This function is called by:
+   616 ;;		_main
+   617 ;; This function uses a non-reentrant model
+   618 ;;
+   619                           psect	text318
+   620                           	file	"SPI.c"
+   621                           	line	129
+   622                           	global	__size_of_Write_Byte
+   623  006B                     	__size_of_Write_Byte	equ	__end_of_Write_Byte-_Write_Byte
+   624                           	
+   625  0725                     _Write_Byte:	
+   626                           	opt	stack 4
+   627                           ; Regs used in _Write_Byte: [wreg+status,2+status,0+pclath+cstack]
+   628                           ;Write_Byte@data stored from wreg
+   629  0725  00FB               	movwf	(Write_Byte@data)
+   630                           	line	130
+   631                           	
+   632  0726                     l4430:	
+   633                           ;SPI.c: 130: RC2 = 1;
+   634  0726  1283               	bcf	status, 5	;RP0=0, select bank0
+   635  0727  1303               	bcf	status, 6	;RP1=0, select bank0
+   636  0728  1507               	bsf	(58/8),(58)&7
+   637                           	line	132
+   638                           	
+   639  0729                     l4432:	
+   640                           ;SPI.c: 132: Write_Enable();
+   641  0729  120A  118A  2519   	fcall	_Write_Enable
+              120A  118A         
+   642                           	line	133
+   643                           ;SPI.c: 133: while((!(Read_Status()&0x02) == 0x02));
+   644  072E  2F30               	goto	l4434
+   645                           	
+   646  072F                     l3151:	
+   647  072F  2F30               	goto	l4434
+   648                           	
+   649  0730                     l3150:	
+   650                           	
+   651  0730                     l4434:	
+   652  0730  120A  118A  2601   	fcall	_Read_Status
+              120A  118A         
+   653                           	
+   654  0735                     l3152:	
+   655                           	line	134
+   656                           ;SPI.c: 134: Write_Status(0x00);
+   657  0735  3000               	movlw	(0)
+   658  0736  120A  118A  25C9   	fcall	_Write_Status
+              120A  118A         
+   659                           	line	135
+   660                           	
+   661  073B                     l4436:	
+   662                           ;SPI.c: 135: RC6 = 0;
+   663  073B  1283               	bcf	status, 5	;RP0=0, select bank0
+   664  073C  1303               	bcf	status, 6	;RP1=0, select bank0
+   665  073D  1307               	bcf	(62/8),(62)&7
+   666                           	line	136
+   667                           ;SPI.c: 136: SPI_delay(1);
+   668  073E  3001               	movlw	low(01h)
+   669  073F  00F0               	movwf	(?_SPI_delay)
+   670  0740  3000               	movlw	high(01h)
+   671  0741  00F1               	movwf	((?_SPI_delay))+1
+   672  0742  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   673                           	line	137
+   674                           ;SPI.c: 137: Send_8Bits(0x02);
+   675  0747  3002               	movlw	(02h)
+   676  0748  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+   677                           	line	138
+   678                           ;SPI.c: 138: SPI_delay(1);
+   679  074D  3001               	movlw	low(01h)
+   680  074E  00F0               	movwf	(?_SPI_delay)
+   681  074F  3000               	movlw	high(01h)
+   682  0750  00F1               	movwf	((?_SPI_delay))+1
+   683  0751  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   684                           	line	139
+   685                           ;SPI.c: 139: Send_8Bits(address);
+   686  0756  0879               	movf	(Write_Byte@address),w
+   687  0757  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+   688                           	line	140
+   689                           ;SPI.c: 140: SPI_delay(1);
+   690  075C  3001               	movlw	low(01h)
+   691  075D  00F0               	movwf	(?_SPI_delay)
+   692  075E  3000               	movlw	high(01h)
+   693  075F  00F1               	movwf	((?_SPI_delay))+1
+   694  0760  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   695                           	line	141
+   696                           ;SPI.c: 141: Send_8Bits(data);
+   697  0765  087B               	movf	(Write_Byte@data),w
+   698  0766  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+   699                           	line	142
+   700                           ;SPI.c: 142: SPI_delay(1);
+   701  076B  3001               	movlw	low(01h)
+   702  076C  00F0               	movwf	(?_SPI_delay)
+   703  076D  3000               	movlw	high(01h)
+   704  076E  00F1               	movwf	((?_SPI_delay))+1
+   705  076F  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   706                           	line	143
+   707                           	
+   708  0774                     l4438:	
+   709                           ;SPI.c: 143: RC6 = 1;
+   710  0774  1283               	bcf	status, 5	;RP0=0, select bank0
+   711  0775  1303               	bcf	status, 6	;RP1=0, select bank0
+   712  0776  1707               	bsf	(62/8),(62)&7
+   713                           	line	144
+   714                           ;SPI.c: 144: SPI_delay(1);
+   715  0777  3001               	movlw	low(01h)
+   716  0778  00F0               	movwf	(?_SPI_delay)
+   717  0779  3000               	movlw	high(01h)
+   718  077A  00F1               	movwf	((?_SPI_delay))+1
+   719  077B  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   720                           	line	146
+   721                           ;SPI.c: 146: while((!(Read_Status()&0x01) == 0x01));
+   722  0780  2F82               	goto	l4440
+   723                           	
+   724  0781                     l3154:	
+   725  0781  2F82               	goto	l4440
+   726                           	
+   727  0782                     l3153:	
+   728                           	
+   729  0782                     l4440:	
+   730  0782  120A  118A  2601   	fcall	_Read_Status
+              120A  118A         
+   731  0787  00FA               	movwf	(??_Write_Byte+0)+0
+   732  0788  1C7A               	btfss	0+(??_Write_Byte+0)+0,(0)&7
+   733  0789  2F8B               	goto	u2291
+   734  078A  2F8C               	goto	u2290
+   735  078B                     u2291:
+   736  078B  2F82               	goto	l4440
+   737  078C                     u2290:
+   738                           	
+   739  078C                     l3155:	
+   740                           	line	148
+   741                           ;SPI.c: 148: RC2 = 0;
+   742  078C  1283               	bcf	status, 5	;RP0=0, select bank0
+   743  078D  1303               	bcf	status, 6	;RP1=0, select bank0
+   744  078E  1107               	bcf	(58/8),(58)&7
+   745                           	line	150
+   746                           	
+   747  078F                     l3156:	
+   748  078F  0008               	return
+   749                           	opt stack 0
+   750                           GLOBAL	__end_of_Write_Byte
+   751  0790                     	__end_of_Write_Byte:
+   752 ;; =============== function _Write_Byte ends ============
+   753                           
+   754                           	signat	_Write_Byte,8312
+   755                           	global	_LCD_init
+   756                           psect	text319,local,class=CODE,delta=2
+   757                           global __ptext319
+   758  056C                     __ptext319:
+   759                           
+   760 ;; *************** function _LCD_init *****************
+   761 ;; Defined at:
+   762 ;;		line 19 in file "LCD.c"
+   763 ;; Parameters:    Size  Location     Type
+   764 ;;		None
+   765 ;; Auto vars:     Size  Location     Type
+   766 ;;		None
+   767 ;; Return value:  Size  Location     Type
+   768 ;;		None               void
+   769 ;; Registers used:
+   770 ;;		wreg, status,2, status,0, pclath, cstack
+   771 ;; Tracked objects:
+   772 ;;		On entry : 0/0
+   773 ;;		On exit  : 0/0
+   774 ;;		Unchanged: 0/0
+   775 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+   776 ;;      Params:         0       0       0       0       0
+   777 ;;      Locals:         0       0       0       0       0
+   778 ;;      Temps:          0       0       0       0       0
+   779 ;;      Totals:         0       0       0       0       0
+   780 ;;Total ram usage:        0 bytes
+   781 ;; Hardware stack levels used:    1
+   782 ;; Hardware stack levels required when called:    3
+   783 ;; This function calls:
+   784 ;;		_LCD_func
+   785 ;; This function is called by:
+   786 ;;		_main
+   787 ;; This function uses a non-reentrant model
+   788 ;;
+   789                           psect	text319
+   790                           	file	"LCD.c"
+   791                           	line	19
+   792                           	global	__size_of_LCD_init
+   793  002B                     	__size_of_LCD_init	equ	__end_of_LCD_init-_LCD_init
+   794                           	
+   795  056C                     _LCD_init:	
+   796                           	opt	stack 4
+   797                           ; Regs used in _LCD_init: [wreg+status,2+status,0+pclath+cstack]
+   798                           	line	20
+   799                           	
+   800  056C                     l4428:	
+   801                           ;LCD.c: 20: LCD_func(0x01,0);
+   802  056C  01FA               	clrf	(?_LCD_func)
+   803  056D  3001               	movlw	(01h)
+   804  056E  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   805                           	line	21
+   806                           ;LCD.c: 21: LCD_func(0x02,0);
+   807  0573  01FA               	clrf	(?_LCD_func)
+   808  0574  3002               	movlw	(02h)
+   809  0575  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   810                           	line	23
+   811                           ;LCD.c: 23: LCD_func(0x06,0);
+   812  057A  01FA               	clrf	(?_LCD_func)
+   813  057B  3006               	movlw	(06h)
+   814  057C  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   815                           	line	30
+   816                           ;LCD.c: 30: LCD_func(0x0c,0);
+   817  0581  01FA               	clrf	(?_LCD_func)
+   818  0582  300C               	movlw	(0Ch)
+   819  0583  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   820                           	line	31
+   821                           ;LCD.c: 31: LCD_func(0x28,0);
+   822  0588  01FA               	clrf	(?_LCD_func)
+   823  0589  3028               	movlw	(028h)
+   824  058A  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   825                           	line	33
+   826                           ;LCD.c: 33: LCD_func(0x80,0);
+   827  058F  01FA               	clrf	(?_LCD_func)
+   828  0590  3080               	movlw	(080h)
+   829  0591  120A  118A  2541   	fcall	_LCD_func
+              120A  118A         
+   830                           	line	35
+   831                           	
+   832  0596                     l2081:	
+   833  0596  0008               	return
+   834                           	opt stack 0
+   835                           GLOBAL	__end_of_LCD_init
+   836  0597                     	__end_of_LCD_init:
+   837 ;; =============== function _LCD_init ends ============
+   838                           
+   839                           	signat	_LCD_init,88
+   840                           	global	_Write_Status
+   841                           psect	text320,local,class=CODE,delta=2
+   842                           global __ptext320
+   843  05C9                     __ptext320:
+   844                           
+   845 ;; *************** function _Write_Status *****************
+   846 ;; Defined at:
+   847 ;;		line 117 in file "SPI.c"
+   848 ;; Parameters:    Size  Location     Type
+   849 ;;  data            1    wreg     unsigned char 
+   850 ;; Auto vars:     Size  Location     Type
+   851 ;;  data            1    7[COMMON] unsigned char 
+   852 ;; Return value:  Size  Location     Type
+   853 ;;		None               void
+   854 ;; Registers used:
+   855 ;;		wreg, status,2, status,0, pclath, cstack
+   856 ;; Tracked objects:
+   857 ;;		On entry : 0/0
+   858 ;;		On exit  : 0/0
+   859 ;;		Unchanged: 0/0
+   860 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+   861 ;;      Params:         0       0       0       0       0
+   862 ;;      Locals:         1       0       0       0       0
+   863 ;;      Temps:          0       0       0       0       0
+   864 ;;      Totals:         1       0       0       0       0
+   865 ;;Total ram usage:        1 bytes
+   866 ;; Hardware stack levels used:    1
+   867 ;; Hardware stack levels required when called:    2
+   868 ;; This function calls:
+   869 ;;		_SPI_delay
+   870 ;;		_Send_8Bits
+   871 ;; This function is called by:
+   872 ;;		_Write_Byte
+   873 ;; This function uses a non-reentrant model
+   874 ;;
+   875                           psect	text320
+   876                           	file	"SPI.c"
+   877                           	line	117
+   878                           	global	__size_of_Write_Status
+   879  0038                     	__size_of_Write_Status	equ	__end_of_Write_Status-_Write_Status
+   880                           	
+   881  05C9                     _Write_Status:	
+   882                           	opt	stack 4
+   883                           ; Regs used in _Write_Status: [wreg+status,2+status,0+pclath+cstack]
+   884                           ;Write_Status@data stored from wreg
+   885  05C9  00F7               	movwf	(Write_Status@data)
+   886                           	line	118
+   887                           	
+   888  05CA                     l4422:	
+   889                           ;SPI.c: 118: RC6 = 0;
+   890  05CA  1283               	bcf	status, 5	;RP0=0, select bank0
+   891  05CB  1303               	bcf	status, 6	;RP1=0, select bank0
+   892  05CC  1307               	bcf	(62/8),(62)&7
+   893                           	line	119
+   894                           	
+   895  05CD                     l4424:	
+   896                           ;SPI.c: 119: SPI_delay(1);
+   897  05CD  3001               	movlw	low(01h)
+   898  05CE  00F0               	movwf	(?_SPI_delay)
+   899  05CF  3000               	movlw	high(01h)
+   900  05D0  00F1               	movwf	((?_SPI_delay))+1
+   901  05D1  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   902                           	line	120
+   903                           ;SPI.c: 120: Send_8Bits(0x01);
+   904  05D6  3001               	movlw	(01h)
+   905  05D7  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+   906                           	line	121
+   907                           ;SPI.c: 121: SPI_delay(1);
+   908  05DC  3001               	movlw	low(01h)
+   909  05DD  00F0               	movwf	(?_SPI_delay)
+   910  05DE  3000               	movlw	high(01h)
+   911  05DF  00F1               	movwf	((?_SPI_delay))+1
+   912  05E0  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   913                           	line	122
+   914                           ;SPI.c: 122: Send_8Bits(data);
+   915  05E5  0877               	movf	(Write_Status@data),w
+   916  05E6  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+   917                           	line	123
+   918                           ;SPI.c: 123: SPI_delay(1);
+   919  05EB  3001               	movlw	low(01h)
+   920  05EC  00F0               	movwf	(?_SPI_delay)
+   921  05ED  3000               	movlw	high(01h)
+   922  05EE  00F1               	movwf	((?_SPI_delay))+1
+   923  05EF  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   924                           	line	124
+   925                           	
+   926  05F4                     l4426:	
+   927                           ;SPI.c: 124: RC6 = 1;
+   928  05F4  1283               	bcf	status, 5	;RP0=0, select bank0
+   929  05F5  1303               	bcf	status, 6	;RP1=0, select bank0
+   930  05F6  1707               	bsf	(62/8),(62)&7
+   931                           	line	125
+   932                           ;SPI.c: 125: SPI_delay(1);
+   933  05F7  3001               	movlw	low(01h)
+   934  05F8  00F0               	movwf	(?_SPI_delay)
+   935  05F9  3000               	movlw	high(01h)
+   936  05FA  00F1               	movwf	((?_SPI_delay))+1
+   937  05FB  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+   938                           	line	126
+   939                           	
+   940  0600                     l3147:	
+   941  0600  0008               	return
+   942                           	opt stack 0
+   943                           GLOBAL	__end_of_Write_Status
+   944  0601                     	__end_of_Write_Status:
+   945 ;; =============== function _Write_Status ends ============
+   946                           
+   947                           	signat	_Write_Status,4216
+   948                           	global	_Read_Status
+   949                           psect	text321,local,class=CODE,delta=2
+   950                           global __ptext321
+   951  0601                     __ptext321:
+   952                           
+   953 ;; *************** function _Read_Status *****************
+   954 ;; Defined at:
+   955 ;;		line 103 in file "SPI.c"
+   956 ;; Parameters:    Size  Location     Type
+   957 ;;		None
+   958 ;; Auto vars:     Size  Location     Type
+   959 ;;  temp            1    8[COMMON] unsigned char 
+   960 ;; Return value:  Size  Location     Type
+   961 ;;                  1    wreg      unsigned char 
+   962 ;; Registers used:
+   963 ;;		wreg, status,2, status,0, pclath, cstack
+   964 ;; Tracked objects:
+   965 ;;		On entry : 0/0
+   966 ;;		On exit  : 0/0
+   967 ;;		Unchanged: 0/0
+   968 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+   969 ;;      Params:         0       0       0       0       0
+   970 ;;      Locals:         1       0       0       0       0
+   971 ;;      Temps:          1       0       0       0       0
+   972 ;;      Totals:         2       0       0       0       0
+   973 ;;Total ram usage:        2 bytes
+   974 ;; Hardware stack levels used:    1
+   975 ;; Hardware stack levels required when called:    2
+   976 ;; This function calls:
+   977 ;;		_SPI_delay
+   978 ;;		_Send_8Bits
+   979 ;;		_Read_8Bits
+   980 ;; This function is called by:
+   981 ;;		_Write_Byte
+   982 ;; This function uses a non-reentrant model
+   983 ;;
+   984                           psect	text321
+   985                           	file	"SPI.c"
+   986                           	line	103
+   987                           	global	__size_of_Read_Status
+   988  003B                     	__size_of_Read_Status	equ	__end_of_Read_Status-_Read_Status
+   989                           	
+   990  0601                     _Read_Status:	
+   991                           	opt	stack 4
+   992                           ; Regs used in _Read_Status: [wreg+status,2+status,0+pclath+cstack]
+   993                           	line	105
+   994                           	
+   995  0601                     l4412:	
+   996                           ;SPI.c: 104: unsigned char temp;
+   997                           ;SPI.c: 105: RC6 = 0;
+   998  0601  1283               	bcf	status, 5	;RP0=0, select bank0
+   999  0602  1303               	bcf	status, 6	;RP1=0, select bank0
+  1000  0603  1307               	bcf	(62/8),(62)&7
+  1001                           	line	106
+  1002                           	
+  1003  0604                     l4414:	
+  1004                           ;SPI.c: 106: SPI_delay(1);
+  1005  0604  3001               	movlw	low(01h)
+  1006  0605  00F0               	movwf	(?_SPI_delay)
+  1007  0606  3000               	movlw	high(01h)
+  1008  0607  00F1               	movwf	((?_SPI_delay))+1
+  1009  0608  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1010                           	line	107
+  1011                           ;SPI.c: 107: Send_8Bits(0x05);
+  1012  060D  3005               	movlw	(05h)
+  1013  060E  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+  1014                           	line	108
+  1015                           ;SPI.c: 108: SPI_delay(1);
+  1016  0613  3001               	movlw	low(01h)
+  1017  0614  00F0               	movwf	(?_SPI_delay)
+  1018  0615  3000               	movlw	high(01h)
+  1019  0616  00F1               	movwf	((?_SPI_delay))+1
+  1020  0617  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1021                           	line	109
+  1022                           ;SPI.c: 109: temp = Read_8Bits();
+  1023  061C  120A  118A  263C   	fcall	_Read_8Bits
+              120A  118A         
+  1024  0621  00F7               	movwf	(??_Read_Status+0)+0
+  1025  0622  0877               	movf	(??_Read_Status+0)+0,w
+  1026  0623  00F8               	movwf	(Read_Status@temp)
+  1027                           	line	110
+  1028                           ;SPI.c: 110: SPI_delay(1);
+  1029  0624  3001               	movlw	low(01h)
+  1030  0625  00F0               	movwf	(?_SPI_delay)
+  1031  0626  3000               	movlw	high(01h)
+  1032  0627  00F1               	movwf	((?_SPI_delay))+1
+  1033  0628  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1034                           	line	111
+  1035                           	
+  1036  062D                     l4416:	
+  1037                           ;SPI.c: 111: RC6 = 1;
+  1038  062D  1283               	bcf	status, 5	;RP0=0, select bank0
+  1039  062E  1303               	bcf	status, 6	;RP1=0, select bank0
+  1040  062F  1707               	bsf	(62/8),(62)&7
+  1041                           	line	112
+  1042                           ;SPI.c: 112: SPI_delay(1);
+  1043  0630  3001               	movlw	low(01h)
+  1044  0631  00F0               	movwf	(?_SPI_delay)
+  1045  0632  3000               	movlw	high(01h)
+  1046  0633  00F1               	movwf	((?_SPI_delay))+1
+  1047  0634  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1048                           	line	113
+  1049                           	
+  1050  0639                     l4418:	
+  1051                           ;SPI.c: 113: return temp;
+  1052  0639  0878               	movf	(Read_Status@temp),w
+  1053  063A  2E3B               	goto	l3144
+  1054                           	
+  1055  063B                     l4420:	
+  1056                           	line	114
+  1057                           	
+  1058  063B                     l3144:	
+  1059  063B  0008               	return
+  1060                           	opt stack 0
+  1061                           GLOBAL	__end_of_Read_Status
+  1062  063C                     	__end_of_Read_Status:
+  1063 ;; =============== function _Read_Status ends ============
+  1064                           
+  1065                           	signat	_Read_Status,89
+  1066                           	global	_Write_Enable
+  1067                           psect	text322,local,class=CODE,delta=2
+  1068                           global __ptext322
+  1069  0519                     __ptext322:
+  1070                           
+  1071 ;; *************** function _Write_Enable *****************
+  1072 ;; Defined at:
+  1073 ;;		line 83 in file "SPI.c"
+  1074 ;; Parameters:    Size  Location     Type
+  1075 ;;		None
+  1076 ;; Auto vars:     Size  Location     Type
+  1077 ;;		None
+  1078 ;; Return value:  Size  Location     Type
+  1079 ;;		None               void
+  1080 ;; Registers used:
+  1081 ;;		wreg, status,2, status,0, pclath, cstack
+  1082 ;; Tracked objects:
+  1083 ;;		On entry : 0/0
+  1084 ;;		On exit  : 0/0
+  1085 ;;		Unchanged: 0/0
+  1086 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1087 ;;      Params:         0       0       0       0       0
+  1088 ;;      Locals:         0       0       0       0       0
+  1089 ;;      Temps:          0       0       0       0       0
+  1090 ;;      Totals:         0       0       0       0       0
+  1091 ;;Total ram usage:        0 bytes
+  1092 ;; Hardware stack levels used:    1
+  1093 ;; Hardware stack levels required when called:    2
+  1094 ;; This function calls:
+  1095 ;;		_SPI_delay
+  1096 ;;		_Send_8Bits
+  1097 ;; This function is called by:
+  1098 ;;		_Write_Byte
+  1099 ;; This function uses a non-reentrant model
+  1100 ;;
+  1101                           psect	text322
+  1102                           	file	"SPI.c"
+  1103                           	line	83
+  1104                           	global	__size_of_Write_Enable
+  1105  0028                     	__size_of_Write_Enable	equ	__end_of_Write_Enable-_Write_Enable
+  1106                           	
+  1107  0519                     _Write_Enable:	
+  1108                           	opt	stack 4
+  1109                           ; Regs used in _Write_Enable: [wreg+status,2+status,0+pclath+cstack]
+  1110                           	line	84
+  1111                           	
+  1112  0519                     l4406:	
+  1113                           ;SPI.c: 84: RC6 = 0;
+  1114  0519  1283               	bcf	status, 5	;RP0=0, select bank0
+  1115  051A  1303               	bcf	status, 6	;RP1=0, select bank0
+  1116  051B  1307               	bcf	(62/8),(62)&7
+  1117                           	line	85
+  1118                           	
+  1119  051C                     l4408:	
+  1120                           ;SPI.c: 85: SPI_delay(1);
+  1121  051C  3001               	movlw	low(01h)
+  1122  051D  00F0               	movwf	(?_SPI_delay)
+  1123  051E  3000               	movlw	high(01h)
+  1124  051F  00F1               	movwf	((?_SPI_delay))+1
+  1125  0520  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1126                           	line	86
+  1127                           ;SPI.c: 86: Send_8Bits(0x06);
+  1128  0525  3006               	movlw	(06h)
+  1129  0526  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+  1130                           	line	87
+  1131                           ;SPI.c: 87: SPI_delay(1);
+  1132  052B  3001               	movlw	low(01h)
+  1133  052C  00F0               	movwf	(?_SPI_delay)
+  1134  052D  3000               	movlw	high(01h)
+  1135  052E  00F1               	movwf	((?_SPI_delay))+1
+  1136  052F  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1137                           	line	88
+  1138                           	
+  1139  0534                     l4410:	
+  1140                           ;SPI.c: 88: RC6 = 1;
+  1141  0534  1283               	bcf	status, 5	;RP0=0, select bank0
+  1142  0535  1303               	bcf	status, 6	;RP1=0, select bank0
+  1143  0536  1707               	bsf	(62/8),(62)&7
+  1144                           	line	89
+  1145                           ;SPI.c: 89: SPI_delay(1);
+  1146  0537  3001               	movlw	low(01h)
+  1147  0538  00F0               	movwf	(?_SPI_delay)
+  1148  0539  3000               	movlw	high(01h)
+  1149  053A  00F1               	movwf	((?_SPI_delay))+1
+  1150  053B  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1151                           	line	90
+  1152                           	
+  1153  0540                     l3138:	
+  1154  0540  0008               	return
+  1155                           	opt stack 0
+  1156                           GLOBAL	__end_of_Write_Enable
+  1157  0541                     	__end_of_Write_Enable:
+  1158 ;; =============== function _Write_Enable ends ============
+  1159                           
+  1160                           	signat	_Write_Enable,88
+  1161                           	global	_LCD_func
+  1162                           psect	text323,local,class=CODE,delta=2
+  1163                           global __ptext323
+  1164  0541                     __ptext323:
+  1165                           
+  1166 ;; *************** function _LCD_func *****************
+  1167 ;; Defined at:
+  1168 ;;		line 37 in file "LCD.c"
+  1169 ;; Parameters:    Size  Location     Type
+  1170 ;;  data            1    wreg     unsigned char 
+  1171 ;;  cmd             1   10[COMMON] unsigned char 
+  1172 ;; Auto vars:     Size  Location     Type
+  1173 ;;  data            1   12[COMMON] unsigned char 
+  1174 ;; Return value:  Size  Location     Type
+  1175 ;;		None               void
+  1176 ;; Registers used:
+  1177 ;;		wreg, status,2, status,0, pclath, cstack
+  1178 ;; Tracked objects:
+  1179 ;;		On entry : 0/0
+  1180 ;;		On exit  : 0/0
+  1181 ;;		Unchanged: 0/0
+  1182 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1183 ;;      Params:         1       0       0       0       0
+  1184 ;;      Locals:         1       0       0       0       0
+  1185 ;;      Temps:          1       0       0       0       0
+  1186 ;;      Totals:         3       0       0       0       0
+  1187 ;;Total ram usage:        3 bytes
+  1188 ;; Hardware stack levels used:    1
+  1189 ;; Hardware stack levels required when called:    2
+  1190 ;; This function calls:
+  1191 ;;		_LCD_enable
+  1192 ;; This function is called by:
+  1193 ;;		_main
+  1194 ;;		_LCD_init
+  1195 ;;		_LCD_cur
+  1196 ;;		_LCD_string
+  1197 ;; This function uses a non-reentrant model
+  1198 ;;
+  1199                           psect	text323
+  1200                           	file	"LCD.c"
+  1201                           	line	37
+  1202                           	global	__size_of_LCD_func
+  1203  002B                     	__size_of_LCD_func	equ	__end_of_LCD_func-_LCD_func
+  1204                           	
+  1205  0541                     _LCD_func:	
+  1206                           	opt	stack 5
+  1207                           ; Regs used in _LCD_func: [wreg+status,2+status,0+pclath+cstack]
+  1208                           ;LCD_func@data stored from wreg
+  1209  0541  00FC               	movwf	(LCD_func@data)
+  1210                           	line	38
+  1211                           	
+  1212  0542                     l4398:	
+  1213                           ;LCD.c: 38: RD4 = (bit)cmd;
+  1214  0542  187A               	btfsc	(LCD_func@cmd),0
+  1215  0543  2D45               	goto	u2261
+  1216  0544  2D49               	goto	u2260
+  1217                           	
+  1218  0545                     u2261:
+  1219  0545  1283               	bcf	status, 5	;RP0=0, select bank0
+  1220  0546  1303               	bcf	status, 6	;RP1=0, select bank0
+  1221  0547  1608               	bsf	(68/8),(68)&7
+  1222  0548  2D4C               	goto	u2274
+  1223  0549                     u2260:
+  1224  0549  1283               	bcf	status, 5	;RP0=0, select bank0
+  1225  054A  1303               	bcf	status, 6	;RP1=0, select bank0
+  1226  054B  1208               	bcf	(68/8),(68)&7
+  1227  054C                     u2274:
+  1228                           	line	39
+  1229                           	
+  1230  054C                     l4400:	
+  1231                           ;LCD.c: 39: (PORTD = (PORTD&0xF0)|data>>4);
+  1232  054C  087C               	movf	(LCD_func@data),w
+  1233  054D  00FB               	movwf	(??_LCD_func+0)+0
+  1234  054E  3004               	movlw	04h
+  1235  054F                     u2285:
+  1236  054F  1003               	clrc
+  1237  0550  0CFB               	rrf	(??_LCD_func+0)+0,f
+  1238  0551  3EFF               	addlw	-1
+  1239  0552  1D03               	skipz
+  1240  0553  2D4F               	goto	u2285
+  1241  0554  0808               	movf	(8),w
+  1242  0555  39F0               	andlw	0F0h
+  1243  0556  047B               	iorwf	0+(??_LCD_func+0)+0,w
+  1244  0557  0088               	movwf	(8)	;volatile
+  1245                           	line	40
+  1246                           	
+  1247  0558                     l4402:	
+  1248                           ;LCD.c: 40: LCD_enable();
+  1249  0558  120A  118A  2500   	fcall	_LCD_enable
+              120A  118A         
+  1250                           	line	42
+  1251                           	
+  1252  055D                     l4404:	
+  1253                           ;LCD.c: 42: (PORTD = (PORTD&0xF0)|data&0x0F);
+  1254  055D  300F               	movlw	(0Fh)
+  1255  055E  057C               	andwf	(LCD_func@data),w
+  1256  055F  00FB               	movwf	(??_LCD_func+0)+0
+  1257  0560  1283               	bcf	status, 5	;RP0=0, select bank0
+  1258  0561  1303               	bcf	status, 6	;RP1=0, select bank0
+  1259  0562  0808               	movf	(8),w
+  1260  0563  39F0               	andlw	0F0h
+  1261  0564  047B               	iorwf	0+(??_LCD_func+0)+0,w
+  1262  0565  0088               	movwf	(8)	;volatile
+  1263                           	line	43
+  1264                           ;LCD.c: 43: LCD_enable();
+  1265  0566  120A  118A  2500   	fcall	_LCD_enable
+              120A  118A         
+  1266                           	line	44
+  1267                           	
+  1268  056B                     l2084:	
+  1269  056B  0008               	return
+  1270                           	opt stack 0
+  1271                           GLOBAL	__end_of_LCD_func
+  1272  056C                     	__end_of_LCD_func:
+  1273 ;; =============== function _LCD_func ends ============
+  1274                           
+  1275                           	signat	_LCD_func,8312
+  1276                           	global	_Read_Byte
+  1277                           psect	text324,local,class=CODE,delta=2
+  1278                           global __ptext324
+  1279  0684                     __ptext324:
+  1280                           
+  1281 ;; *************** function _Read_Byte *****************
+  1282 ;; Defined at:
+  1283 ;;		line 153 in file "SPI.c"
+  1284 ;; Parameters:    Size  Location     Type
+  1285 ;;  address         1    wreg     unsigned char 
+  1286 ;; Auto vars:     Size  Location     Type
+  1287 ;;  address         1    8[COMMON] unsigned char 
+  1288 ;;  temp            1    9[COMMON] unsigned char 
+  1289 ;; Return value:  Size  Location     Type
+  1290 ;;                  1    wreg      unsigned char 
+  1291 ;; Registers used:
+  1292 ;;		wreg, status,2, status,0, pclath, cstack
+  1293 ;; Tracked objects:
+  1294 ;;		On entry : 0/0
+  1295 ;;		On exit  : 0/0
+  1296 ;;		Unchanged: 0/0
+  1297 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1298 ;;      Params:         0       0       0       0       0
+  1299 ;;      Locals:         2       0       0       0       0
+  1300 ;;      Temps:          1       0       0       0       0
+  1301 ;;      Totals:         3       0       0       0       0
+  1302 ;;Total ram usage:        3 bytes
+  1303 ;; Hardware stack levels used:    1
+  1304 ;; Hardware stack levels required when called:    2
+  1305 ;; This function calls:
+  1306 ;;		_SPI_delay
+  1307 ;;		_Send_8Bits
+  1308 ;;		_Read_8Bits
+  1309 ;; This function is called by:
+  1310 ;;		_main
+  1311 ;; This function uses a non-reentrant model
+  1312 ;;
+  1313                           psect	text324
+  1314                           	file	"SPI.c"
+  1315                           	line	153
+  1316                           	global	__size_of_Read_Byte
+  1317  004B                     	__size_of_Read_Byte	equ	__end_of_Read_Byte-_Read_Byte
+  1318                           	
+  1319  0684                     _Read_Byte:	
+  1320                           	opt	stack 5
+  1321                           ; Regs used in _Read_Byte: [wreg+status,2+status,0+pclath+cstack]
+  1322                           ;Read_Byte@address stored from wreg
+  1323                           	line	155
+  1324  0684  00F8               	movwf	(Read_Byte@address)
+  1325                           	
+  1326  0685                     l4388:	
+  1327                           ;SPI.c: 154: unsigned char temp;
+  1328                           ;SPI.c: 155: RC6 = 0;
+  1329  0685  1283               	bcf	status, 5	;RP0=0, select bank0
+  1330  0686  1303               	bcf	status, 6	;RP1=0, select bank0
+  1331  0687  1307               	bcf	(62/8),(62)&7
+  1332                           	line	156
+  1333                           	
+  1334  0688                     l4390:	
+  1335                           ;SPI.c: 156: SPI_delay(1);
+  1336  0688  3001               	movlw	low(01h)
+  1337  0689  00F0               	movwf	(?_SPI_delay)
+  1338  068A  3000               	movlw	high(01h)
+  1339  068B  00F1               	movwf	((?_SPI_delay))+1
+  1340  068C  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1341                           	line	157
+  1342                           ;SPI.c: 157: Send_8Bits(0x03);
+  1343  0691  3003               	movlw	(03h)
+  1344  0692  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+  1345                           	line	158
+  1346                           ;SPI.c: 158: SPI_delay(1);
+  1347  0697  3001               	movlw	low(01h)
+  1348  0698  00F0               	movwf	(?_SPI_delay)
+  1349  0699  3000               	movlw	high(01h)
+  1350  069A  00F1               	movwf	((?_SPI_delay))+1
+  1351  069B  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1352                           	line	159
+  1353                           ;SPI.c: 159: Send_8Bits(address);
+  1354  06A0  0878               	movf	(Read_Byte@address),w
+  1355  06A1  120A  118A  26CF   	fcall	_Send_8Bits
+              120A  118A         
+  1356                           	line	160
+  1357                           ;SPI.c: 160: SPI_delay(1);
+  1358  06A6  3001               	movlw	low(01h)
+  1359  06A7  00F0               	movwf	(?_SPI_delay)
+  1360  06A8  3000               	movlw	high(01h)
+  1361  06A9  00F1               	movwf	((?_SPI_delay))+1
+  1362  06AA  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1363                           	line	161
+  1364                           ;SPI.c: 161: temp = Read_8Bits();
+  1365  06AF  120A  118A  263C   	fcall	_Read_8Bits
+              120A  118A         
+  1366  06B4  00F7               	movwf	(??_Read_Byte+0)+0
+  1367  06B5  0877               	movf	(??_Read_Byte+0)+0,w
+  1368  06B6  00F9               	movwf	(Read_Byte@temp)
+  1369                           	line	162
+  1370                           ;SPI.c: 162: SPI_delay(1);
+  1371  06B7  3001               	movlw	low(01h)
+  1372  06B8  00F0               	movwf	(?_SPI_delay)
+  1373  06B9  3000               	movlw	high(01h)
+  1374  06BA  00F1               	movwf	((?_SPI_delay))+1
+  1375  06BB  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1376                           	line	163
+  1377                           	
+  1378  06C0                     l4392:	
+  1379                           ;SPI.c: 163: RC6 = 1;
+  1380  06C0  1283               	bcf	status, 5	;RP0=0, select bank0
+  1381  06C1  1303               	bcf	status, 6	;RP1=0, select bank0
+  1382  06C2  1707               	bsf	(62/8),(62)&7
+  1383                           	line	164
+  1384                           ;SPI.c: 164: SPI_delay(1);
+  1385  06C3  3001               	movlw	low(01h)
+  1386  06C4  00F0               	movwf	(?_SPI_delay)
+  1387  06C5  3000               	movlw	high(01h)
+  1388  06C6  00F1               	movwf	((?_SPI_delay))+1
+  1389  06C7  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1390                           	line	166
+  1391                           	
+  1392  06CC                     l4394:	
+  1393                           ;SPI.c: 166: return temp;
+  1394  06CC  0879               	movf	(Read_Byte@temp),w
+  1395  06CD  2ECE               	goto	l3159
+  1396                           	
+  1397  06CE                     l4396:	
+  1398                           	line	167
+  1399                           	
+  1400  06CE                     l3159:	
+  1401  06CE  0008               	return
+  1402                           	opt stack 0
+  1403                           GLOBAL	__end_of_Read_Byte
+  1404  06CF                     	__end_of_Read_Byte:
+  1405 ;; =============== function _Read_Byte ends ============
+  1406                           
+  1407                           	signat	_Read_Byte,4217
+  1408                           	global	_Send_8Bits
+  1409                           psect	text325,local,class=CODE,delta=2
+  1410                           global __ptext325
+  1411  06CF                     __ptext325:
+  1412                           
+  1413 ;; *************** function _Send_8Bits *****************
+  1414 ;; Defined at:
+  1415 ;;		line 60 in file "SPI.c"
+  1416 ;; Parameters:    Size  Location     Type
+  1417 ;;  data            1    wreg     unsigned char 
+  1418 ;; Auto vars:     Size  Location     Type
+  1419 ;;  data            1    4[COMMON] unsigned char 
+  1420 ;;  i               1    6[COMMON] unsigned char 
+  1421 ;;  temp            1    5[COMMON] unsigned char 
+  1422 ;; Return value:  Size  Location     Type
+  1423 ;;		None               void
+  1424 ;; Registers used:
+  1425 ;;		wreg, status,2, status,0, pclath, cstack
+  1426 ;; Tracked objects:
+  1427 ;;		On entry : 0/0
+  1428 ;;		On exit  : 0/0
+  1429 ;;		Unchanged: 0/0
+  1430 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1431 ;;      Params:         0       0       0       0       0
+  1432 ;;      Locals:         3       0       0       0       0
+  1433 ;;      Temps:          2       0       0       0       0
+  1434 ;;      Totals:         5       0       0       0       0
+  1435 ;;Total ram usage:        5 bytes
+  1436 ;; Hardware stack levels used:    1
+  1437 ;; Hardware stack levels required when called:    1
+  1438 ;; This function calls:
+  1439 ;;		_SPI_delay
+  1440 ;; This function is called by:
+  1441 ;;		_Write_Enable
+  1442 ;;		_Read_Status
+  1443 ;;		_Write_Status
+  1444 ;;		_Write_Byte
+  1445 ;;		_Read_Byte
+  1446 ;;		_Write_Disable
+  1447 ;; This function uses a non-reentrant model
+  1448 ;;
+  1449                           psect	text325
+  1450                           	file	"SPI.c"
+  1451                           	line	60
+  1452                           	global	__size_of_Send_8Bits
+  1453  0056                     	__size_of_Send_8Bits	equ	__end_of_Send_8Bits-_Send_8Bits
+  1454                           	
+  1455  06CF                     _Send_8Bits:	
+  1456                           	opt	stack 5
+  1457                           ; Regs used in _Send_8Bits: [wreg+status,2+status,0+pclath+cstack]
+  1458                           ;Send_8Bits@data stored from wreg
+  1459                           	line	62
+  1460  06CF  00F4               	movwf	(Send_8Bits@data)
+  1461                           	
+  1462  06D0                     l4362:	
+  1463                           ;SPI.c: 61: unsigned char temp,i;
+  1464                           ;SPI.c: 62: temp = data;
+  1465  06D0  0874               	movf	(Send_8Bits@data),w
+  1466  06D1  00F2               	movwf	(??_Send_8Bits+0)+0
+  1467  06D2  0872               	movf	(??_Send_8Bits+0)+0,w
+  1468  06D3  00F5               	movwf	(Send_8Bits@temp)
+  1469                           	line	63
+  1470                           	
+  1471  06D4                     l4364:	
+  1472                           ;SPI.c: 63: for(i=0;i<8;i++)
+  1473  06D4  01F6               	clrf	(Send_8Bits@i)
+  1474  06D5  3008               	movlw	(08h)
+  1475  06D6  0276               	subwf	(Send_8Bits@i),w
+  1476  06D7  1C03               	skipc
+  1477  06D8  2EDA               	goto	u2231
+  1478  06D9  2EDB               	goto	u2230
+  1479  06DA                     u2231:
+  1480  06DA  2EDD               	goto	l3131
+  1481  06DB                     u2230:
+  1482  06DB  2F24               	goto	l3135
+  1483                           	
+  1484  06DC                     l4366:	
+  1485  06DC  2F24               	goto	l3135
+  1486                           	line	64
+  1487                           	
+  1488  06DD                     l3131:	
+  1489                           	line	65
+  1490                           ;SPI.c: 64: {
+  1491                           ;SPI.c: 65: RC3 = 0;
+  1492  06DD  1283               	bcf	status, 5	;RP0=0, select bank0
+  1493  06DE  1303               	bcf	status, 6	;RP1=0, select bank0
+  1494  06DF  1187               	bcf	(59/8),(59)&7
+  1495                           	line	66
+  1496                           	
+  1497  06E0                     l4368:	
+  1498                           ;SPI.c: 66: SPI_delay(1);
+  1499  06E0  3001               	movlw	low(01h)
+  1500  06E1  00F0               	movwf	(?_SPI_delay)
+  1501  06E2  3000               	movlw	high(01h)
+  1502  06E3  00F1               	movwf	((?_SPI_delay))+1
+  1503  06E4  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1504                           	line	68
+  1505                           	
+  1506  06E9                     l4370:	
+  1507                           ;SPI.c: 68: if(temp&0x80)
+  1508  06E9  1FF5               	btfss	(Send_8Bits@temp),(7)&7
+  1509  06EA  2EEC               	goto	u2241
+  1510  06EB  2EED               	goto	u2240
+  1511  06EC                     u2241:
+  1512  06EC  2EF1               	goto	l3133
+  1513  06ED                     u2240:
+  1514                           	line	69
+  1515                           	
+  1516  06ED                     l4372:	
+  1517                           ;SPI.c: 69: RC5 = 1;
+  1518  06ED  1283               	bcf	status, 5	;RP0=0, select bank0
+  1519  06EE  1303               	bcf	status, 6	;RP1=0, select bank0
+  1520  06EF  1687               	bsf	(61/8),(61)&7
+  1521  06F0  2EF5               	goto	l4374
+  1522                           	line	70
+  1523                           	
+  1524  06F1                     l3133:	
+  1525                           	line	71
+  1526                           ;SPI.c: 70: else
+  1527                           ;SPI.c: 71: RC5 = 0;
+  1528  06F1  1283               	bcf	status, 5	;RP0=0, select bank0
+  1529  06F2  1303               	bcf	status, 6	;RP1=0, select bank0
+  1530  06F3  1287               	bcf	(61/8),(61)&7
+  1531  06F4  2EF5               	goto	l4374
+  1532                           	
+  1533  06F5                     l3134:	
+  1534                           	line	73
+  1535                           	
+  1536  06F5                     l4374:	
+  1537                           ;SPI.c: 73: temp = temp<<1;
+  1538  06F5  0875               	movf	(Send_8Bits@temp),w
+  1539  06F6  00F2               	movwf	(??_Send_8Bits+0)+0
+  1540  06F7  0772               	addwf	(??_Send_8Bits+0)+0,w
+  1541  06F8  00F3               	movwf	(??_Send_8Bits+1)+0
+  1542  06F9  0873               	movf	(??_Send_8Bits+1)+0,w
+  1543  06FA  00F5               	movwf	(Send_8Bits@temp)
+  1544                           	line	74
+  1545                           	
+  1546  06FB                     l4376:	
+  1547                           ;SPI.c: 74: SPI_delay(1);
+  1548  06FB  3001               	movlw	low(01h)
+  1549  06FC  00F0               	movwf	(?_SPI_delay)
+  1550  06FD  3000               	movlw	high(01h)
+  1551  06FE  00F1               	movwf	((?_SPI_delay))+1
+  1552  06FF  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1553                           	line	75
+  1554                           	
+  1555  0704                     l4378:	
+  1556                           ;SPI.c: 75: RC3 = 1;
+  1557  0704  1283               	bcf	status, 5	;RP0=0, select bank0
+  1558  0705  1303               	bcf	status, 6	;RP1=0, select bank0
+  1559  0706  1587               	bsf	(59/8),(59)&7
+  1560                           	line	76
+  1561                           	
+  1562  0707                     l4380:	
+  1563                           ;SPI.c: 76: SPI_delay(1);
+  1564  0707  3001               	movlw	low(01h)
+  1565  0708  00F0               	movwf	(?_SPI_delay)
+  1566  0709  3000               	movlw	high(01h)
+  1567  070A  00F1               	movwf	((?_SPI_delay))+1
+  1568  070B  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1569                           	line	77
+  1570                           	
+  1571  0710                     l4382:	
+  1572                           ;SPI.c: 77: SPI_delay(1);
+  1573  0710  3001               	movlw	low(01h)
+  1574  0711  00F0               	movwf	(?_SPI_delay)
+  1575  0712  3000               	movlw	high(01h)
+  1576  0713  00F1               	movwf	((?_SPI_delay))+1
+  1577  0714  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1578                           	line	63
+  1579                           	
+  1580  0719                     l4384:	
+  1581  0719  3001               	movlw	(01h)
+  1582  071A  00F2               	movwf	(??_Send_8Bits+0)+0
+  1583  071B  0872               	movf	(??_Send_8Bits+0)+0,w
+  1584  071C  07F6               	addwf	(Send_8Bits@i),f
+  1585                           	
+  1586  071D                     l4386:	
+  1587  071D  3008               	movlw	(08h)
+  1588  071E  0276               	subwf	(Send_8Bits@i),w
+  1589  071F  1C03               	skipc
+  1590  0720  2F22               	goto	u2251
+  1591  0721  2F23               	goto	u2250
+  1592  0722                     u2251:
+  1593  0722  2EDD               	goto	l3131
+  1594  0723                     u2250:
+  1595  0723  2F24               	goto	l3135
+  1596                           	
+  1597  0724                     l3132:	
+  1598                           	line	80
+  1599                           	
+  1600  0724                     l3135:	
+  1601  0724  0008               	return
+  1602                           	opt stack 0
+  1603                           GLOBAL	__end_of_Send_8Bits
+  1604  0725                     	__end_of_Send_8Bits:
+  1605 ;; =============== function _Send_8Bits ends ============
+  1606                           
+  1607                           	signat	_Send_8Bits,4216
+  1608                           	global	_Read_8Bits
+  1609                           psect	text326,local,class=CODE,delta=2
+  1610                           global __ptext326
+  1611  063C                     __ptext326:
+  1612                           
+  1613 ;; *************** function _Read_8Bits *****************
+  1614 ;; Defined at:
+  1615 ;;		line 39 in file "SPI.c"
+  1616 ;; Parameters:    Size  Location     Type
+  1617 ;;		None
+  1618 ;; Auto vars:     Size  Location     Type
+  1619 ;;  temp            1    5[COMMON] unsigned char 
+  1620 ;;  i               1    4[COMMON] unsigned char 
+  1621 ;; Return value:  Size  Location     Type
+  1622 ;;                  1    wreg      unsigned char 
+  1623 ;; Registers used:
+  1624 ;;		wreg, status,2, status,0, pclath, cstack
+  1625 ;; Tracked objects:
+  1626 ;;		On entry : 0/0
+  1627 ;;		On exit  : 0/0
+  1628 ;;		Unchanged: 0/0
+  1629 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1630 ;;      Params:         0       0       0       0       0
+  1631 ;;      Locals:         2       0       0       0       0
+  1632 ;;      Temps:          2       0       0       0       0
+  1633 ;;      Totals:         4       0       0       0       0
+  1634 ;;Total ram usage:        4 bytes
+  1635 ;; Hardware stack levels used:    1
+  1636 ;; Hardware stack levels required when called:    1
+  1637 ;; This function calls:
+  1638 ;;		_SPI_delay
+  1639 ;; This function is called by:
+  1640 ;;		_Read_Status
+  1641 ;;		_Read_Byte
+  1642 ;; This function uses a non-reentrant model
+  1643 ;;
+  1644                           psect	text326
+  1645                           	file	"SPI.c"
+  1646                           	line	39
+  1647                           	global	__size_of_Read_8Bits
+  1648  0048                     	__size_of_Read_8Bits	equ	__end_of_Read_8Bits-_Read_8Bits
+  1649                           	
+  1650  063C                     _Read_8Bits:	
+  1651                           	opt	stack 5
+  1652                           ; Regs used in _Read_8Bits: [wreg+status,2+status,0+pclath+cstack]
+  1653                           	line	41
+  1654                           	
+  1655  063C                     l4338:	
+  1656                           ;SPI.c: 40: unsigned char temp,i;
+  1657                           ;SPI.c: 41: for(i=0;i<8;i++)
+  1658  063C  01F4               	clrf	(Read_8Bits@i)
+  1659                           	
+  1660  063D                     l4340:	
+  1661  063D  3008               	movlw	(08h)
+  1662  063E  0274               	subwf	(Read_8Bits@i),w
+  1663  063F  1C03               	skipc
+  1664  0640  2E42               	goto	u2201
+  1665  0641  2E43               	goto	u2200
+  1666  0642                     u2201:
+  1667  0642  2E45               	goto	l3124
+  1668  0643                     u2200:
+  1669  0643  2E81               	goto	l4358
+  1670                           	
+  1671  0644                     l4342:	
+  1672  0644  2E81               	goto	l4358
+  1673                           	line	42
+  1674                           	
+  1675  0645                     l3124:	
+  1676                           	line	43
+  1677                           ;SPI.c: 42: {
+  1678                           ;SPI.c: 43: RC3 = 0;
+  1679  0645  1283               	bcf	status, 5	;RP0=0, select bank0
+  1680  0646  1303               	bcf	status, 6	;RP1=0, select bank0
+  1681  0647  1187               	bcf	(59/8),(59)&7
+  1682                           	line	44
+  1683                           	
+  1684  0648                     l4344:	
+  1685                           ;SPI.c: 44: SPI_delay(1);
+  1686  0648  3001               	movlw	low(01h)
+  1687  0649  00F0               	movwf	(?_SPI_delay)
+  1688  064A  3000               	movlw	high(01h)
+  1689  064B  00F1               	movwf	((?_SPI_delay))+1
+  1690  064C  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1691                           	line	45
+  1692                           	
+  1693  0651                     l4346:	
+  1694                           ;SPI.c: 45: temp = temp<<1;
+  1695  0651  0875               	movf	(Read_8Bits@temp),w
+  1696  0652  00F2               	movwf	(??_Read_8Bits+0)+0
+  1697  0653  0772               	addwf	(??_Read_8Bits+0)+0,w
+  1698  0654  00F3               	movwf	(??_Read_8Bits+1)+0
+  1699  0655  0873               	movf	(??_Read_8Bits+1)+0,w
+  1700  0656  00F5               	movwf	(Read_8Bits@temp)
+  1701                           	line	46
+  1702                           	
+  1703  0657                     l4348:	
+  1704                           ;SPI.c: 46: if(RC4)
+  1705  0657  1283               	bcf	status, 5	;RP0=0, select bank0
+  1706  0658  1303               	bcf	status, 6	;RP1=0, select bank0
+  1707  0659  1E07               	btfss	(60/8),(60)&7
+  1708  065A  2E5C               	goto	u2211
+  1709  065B  2E5D               	goto	u2210
+  1710  065C                     u2211:
+  1711  065C  2E63               	goto	l3127
+  1712  065D                     u2210:
+  1713                           	line	47
+  1714                           	
+  1715  065D                     l4350:	
+  1716                           ;SPI.c: 47: temp = temp+1;
+  1717  065D  0875               	movf	(Read_8Bits@temp),w
+  1718  065E  3E01               	addlw	01h
+  1719  065F  00F2               	movwf	(??_Read_8Bits+0)+0
+  1720  0660  0872               	movf	(??_Read_8Bits+0)+0,w
+  1721  0661  00F5               	movwf	(Read_8Bits@temp)
+  1722  0662  2E63               	goto	l3127
+  1723                           	line	48
+  1724                           ;SPI.c: 48: else
+  1725                           ;SPI.c: 49: temp = temp+0;
+  1726                           	
+  1727  0663                     l3126:	
+  1728                           	line	49
+  1729                           	
+  1730  0663                     l3127:	
+  1731                           	line	51
+  1732                           ;SPI.c: 51: RC3 = 1;
+  1733  0663  1587               	bsf	(59/8),(59)&7
+  1734                           	line	52
+  1735                           	
+  1736  0664                     l4352:	
+  1737                           ;SPI.c: 52: SPI_delay(1);
+  1738  0664  3001               	movlw	low(01h)
+  1739  0665  00F0               	movwf	(?_SPI_delay)
+  1740  0666  3000               	movlw	high(01h)
+  1741  0667  00F1               	movwf	((?_SPI_delay))+1
+  1742  0668  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1743                           	line	53
+  1744                           ;SPI.c: 53: SPI_delay(1);
+  1745  066D  3001               	movlw	low(01h)
+  1746  066E  00F0               	movwf	(?_SPI_delay)
+  1747  066F  3000               	movlw	high(01h)
+  1748  0670  00F1               	movwf	((?_SPI_delay))+1
+  1749  0671  120A  118A  24EC   	fcall	_SPI_delay
+              120A  118A         
+  1750                           	line	41
+  1751                           	
+  1752  0676                     l4354:	
+  1753  0676  3001               	movlw	(01h)
+  1754  0677  00F2               	movwf	(??_Read_8Bits+0)+0
+  1755  0678  0872               	movf	(??_Read_8Bits+0)+0,w
+  1756  0679  07F4               	addwf	(Read_8Bits@i),f
+  1757                           	
+  1758  067A                     l4356:	
+  1759  067A  3008               	movlw	(08h)
+  1760  067B  0274               	subwf	(Read_8Bits@i),w
+  1761  067C  1C03               	skipc
+  1762  067D  2E7F               	goto	u2221
+  1763  067E  2E80               	goto	u2220
+  1764  067F                     u2221:
+  1765  067F  2E45               	goto	l3124
+  1766  0680                     u2220:
+  1767  0680  2E81               	goto	l4358
+  1768                           	
+  1769  0681                     l3125:	
+  1770                           	line	56
+  1771                           	
+  1772  0681                     l4358:	
+  1773                           ;SPI.c: 55: }
+  1774                           ;SPI.c: 56: return temp;
+  1775  0681  0875               	movf	(Read_8Bits@temp),w
+  1776  0682  2E83               	goto	l3128
+  1777                           	
+  1778  0683                     l4360:	
+  1779                           	line	57
+  1780                           	
+  1781  0683                     l3128:	
+  1782  0683  0008               	return
+  1783                           	opt stack 0
+  1784                           GLOBAL	__end_of_Read_8Bits
+  1785  0684                     	__end_of_Read_8Bits:
+  1786 ;; =============== function _Read_8Bits ends ============
+  1787                           
+  1788                           	signat	_Read_8Bits,89
+  1789                           	global	_LCD_enable
+  1790                           psect	text327,local,class=CODE,delta=2
+  1791                           global __ptext327
+  1792  0500                     __ptext327:
+  1793                           
+  1794 ;; *************** function _LCD_enable *****************
+  1795 ;; Defined at:
+  1796 ;;		line 12 in file "LCD.c"
+  1797 ;; Parameters:    Size  Location     Type
+  1798 ;;		None
+  1799 ;; Auto vars:     Size  Location     Type
+  1800 ;;		None
+  1801 ;; Return value:  Size  Location     Type
+  1802 ;;		None               void
+  1803 ;; Registers used:
+  1804 ;;		wreg, status,2, status,0, pclath, cstack
+  1805 ;; Tracked objects:
+  1806 ;;		On entry : 0/0
+  1807 ;;		On exit  : 0/0
+  1808 ;;		Unchanged: 0/0
+  1809 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1810 ;;      Params:         0       0       0       0       0
+  1811 ;;      Locals:         0       0       0       0       0
+  1812 ;;      Temps:          0       0       0       0       0
+  1813 ;;      Totals:         0       0       0       0       0
+  1814 ;;Total ram usage:        0 bytes
+  1815 ;; Hardware stack levels used:    1
+  1816 ;; Hardware stack levels required when called:    1
+  1817 ;; This function calls:
+  1818 ;;		_LCD_delay
+  1819 ;; This function is called by:
+  1820 ;;		_LCD_func
+  1821 ;; This function uses a non-reentrant model
+  1822 ;;
+  1823                           psect	text327
+  1824                           	file	"LCD.c"
+  1825                           	line	12
+  1826                           	global	__size_of_LCD_enable
+  1827  0019                     	__size_of_LCD_enable	equ	__end_of_LCD_enable-_LCD_enable
+  1828                           	
+  1829  0500                     _LCD_enable:	
+  1830                           	opt	stack 5
+  1831                           ; Regs used in _LCD_enable: [wreg+status,2+status,0+pclath+cstack]
+  1832                           	line	13
+  1833                           	
+  1834  0500                     l4332:	
+  1835                           ;LCD.c: 13: RD5 = 1;
+  1836  0500  1283               	bcf	status, 5	;RP0=0, select bank0
+  1837  0501  1303               	bcf	status, 6	;RP1=0, select bank0
+  1838  0502  1688               	bsf	(69/8),(69)&7
+  1839                           	line	14
+  1840                           	
+  1841  0503                     l4334:	
+  1842                           ;LCD.c: 14: LCD_delay(500);
+  1843  0503  30F4               	movlw	low(01F4h)
+  1844  0504  00F0               	movwf	(?_LCD_delay)
+  1845  0505  3001               	movlw	high(01F4h)
+  1846  0506  00F1               	movwf	((?_LCD_delay))+1
+  1847  0507  120A  118A  24D8   	fcall	_LCD_delay
+              120A  118A         
+  1848                           	line	15
+  1849                           	
+  1850  050C                     l4336:	
+  1851                           ;LCD.c: 15: RD5 = 0;
+  1852  050C  1283               	bcf	status, 5	;RP0=0, select bank0
+  1853  050D  1303               	bcf	status, 6	;RP1=0, select bank0
+  1854  050E  1288               	bcf	(69/8),(69)&7
+  1855                           	line	16
+  1856                           ;LCD.c: 16: LCD_delay(500);
+  1857  050F  30F4               	movlw	low(01F4h)
+  1858  0510  00F0               	movwf	(?_LCD_delay)
+  1859  0511  3001               	movlw	high(01F4h)
+  1860  0512  00F1               	movwf	((?_LCD_delay))+1
+  1861  0513  120A  118A  24D8   	fcall	_LCD_delay
+              120A  118A         
+  1862                           	line	17
+  1863                           	
+  1864  0518                     l2078:	
+  1865  0518  0008               	return
+  1866                           	opt stack 0
+  1867                           GLOBAL	__end_of_LCD_enable
+  1868  0519                     	__end_of_LCD_enable:
+  1869 ;; =============== function _LCD_enable ends ============
+  1870                           
+  1871                           	signat	_LCD_enable,88
+  1872                           	global	_SPI_delay
+  1873                           psect	text328,local,class=CODE,delta=2
+  1874                           global __ptext328
+  1875  04EC                     __ptext328:
+  1876                           
+  1877 ;; *************** function _SPI_delay *****************
+  1878 ;; Defined at:
+  1879 ;;		line 27 in file "SPI.c"
+  1880 ;; Parameters:    Size  Location     Type
+  1881 ;;  x               2    0[COMMON] unsigned int 
+  1882 ;; Auto vars:     Size  Location     Type
+  1883 ;;		None
+  1884 ;; Return value:  Size  Location     Type
+  1885 ;;		None               void
+  1886 ;; Registers used:
+  1887 ;;		wreg
+  1888 ;; Tracked objects:
+  1889 ;;		On entry : 0/0
+  1890 ;;		On exit  : 0/0
+  1891 ;;		Unchanged: 0/0
+  1892 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1893 ;;      Params:         2       0       0       0       0
+  1894 ;;      Locals:         0       0       0       0       0
+  1895 ;;      Temps:          0       0       0       0       0
+  1896 ;;      Totals:         2       0       0       0       0
+  1897 ;;Total ram usage:        2 bytes
+  1898 ;; Hardware stack levels used:    1
+  1899 ;; This function calls:
+  1900 ;;		Nothing
+  1901 ;; This function is called by:
+  1902 ;;		_Read_8Bits
+  1903 ;;		_Send_8Bits
+  1904 ;;		_Write_Enable
+  1905 ;;		_Read_Status
+  1906 ;;		_Write_Status
+  1907 ;;		_Write_Byte
+  1908 ;;		_Read_Byte
+  1909 ;;		_Write_Disable
+  1910 ;; This function uses a non-reentrant model
+  1911 ;;
+  1912                           psect	text328
+  1913                           	file	"SPI.c"
+  1914                           	line	27
+  1915                           	global	__size_of_SPI_delay
+  1916  0014                     	__size_of_SPI_delay	equ	__end_of_SPI_delay-_SPI_delay
+  1917                           	
+  1918  04EC                     _SPI_delay:	
+  1919                           	opt	stack 5
+  1920                           ; Regs used in _SPI_delay: [wreg]
+  1921                           	
+  1922  04EC                     l3550:	
+  1923  04EC  2CEE               	goto	l3552
+  1924                           	
+  1925  04ED                     l3119:	
+  1926  04ED  2CEE               	goto	l3552
+  1927                           	
+  1928  04EE                     l3118:	
+  1929                           	
+  1930  04EE                     l3552:	
+  1931  04EE  3001               	movlw	low(01h)
+  1932  04EF  02F0               	subwf	(SPI_delay@x),f
+  1933  04F0  3000               	movlw	high(01h)
+  1934  04F1  1C03               	skipc
+  1935  04F2  03F1               	decf	(SPI_delay@x+1),f
+  1936  04F3  02F1               	subwf	(SPI_delay@x+1),f
+  1937  04F4  30FF               	movlw	high(0FFFFh)
+  1938  04F5  0671               	xorwf	((SPI_delay@x+1)),w
+  1939  04F6  1D03               	skipz
+  1940  04F7  2CFA               	goto	u65
+  1941  04F8  30FF               	movlw	low(0FFFFh)
+  1942  04F9  0670               	xorwf	((SPI_delay@x)),w
+  1943  04FA                     u65:
+  1944                           
+  1945  04FA  1D03               	skipz
+  1946  04FB  2CFD               	goto	u61
+  1947  04FC  2CFE               	goto	u60
+  1948  04FD                     u61:
+  1949  04FD  2CEE               	goto	l3552
+  1950  04FE                     u60:
+  1951  04FE  2CFF               	goto	l3121
+  1952                           	
+  1953  04FF                     l3120:	
+  1954                           	
+  1955  04FF                     l3121:	
+  1956  04FF  0008               	return
+  1957                           	opt stack 0
+  1958                           GLOBAL	__end_of_SPI_delay
+  1959  0500                     	__end_of_SPI_delay:
+  1960 ;; =============== function _SPI_delay ends ============
+  1961                           
+  1962                           	signat	_SPI_delay,4216
+  1963                           	global	_LCD_delay
+  1964                           psect	text329,local,class=CODE,delta=2
+  1965                           global __ptext329
+  1966  04D8                     __ptext329:
+  1967                           
+  1968 ;; *************** function _LCD_delay *****************
+  1969 ;; Defined at:
+  1970 ;;		line 10 in file "LCD.c"
+  1971 ;; Parameters:    Size  Location     Type
+  1972 ;;  x               2    0[COMMON] unsigned int 
+  1973 ;; Auto vars:     Size  Location     Type
+  1974 ;;		None
+  1975 ;; Return value:  Size  Location     Type
+  1976 ;;		None               void
+  1977 ;; Registers used:
+  1978 ;;		wreg
+  1979 ;; Tracked objects:
+  1980 ;;		On entry : 0/0
+  1981 ;;		On exit  : 0/0
+  1982 ;;		Unchanged: 0/0
+  1983 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  1984 ;;      Params:         2       0       0       0       0
+  1985 ;;      Locals:         0       0       0       0       0
+  1986 ;;      Temps:          0       0       0       0       0
+  1987 ;;      Totals:         2       0       0       0       0
+  1988 ;;Total ram usage:        2 bytes
+  1989 ;; Hardware stack levels used:    1
+  1990 ;; This function calls:
+  1991 ;;		Nothing
+  1992 ;; This function is called by:
+  1993 ;;		_LCD_enable
+  1994 ;; This function uses a non-reentrant model
+  1995 ;;
+  1996                           psect	text329
+  1997                           	file	"LCD.c"
+  1998                           	line	10
+  1999                           	global	__size_of_LCD_delay
+  2000  0014                     	__size_of_LCD_delay	equ	__end_of_LCD_delay-_LCD_delay
+  2001                           	
+  2002  04D8                     _LCD_delay:	
+  2003                           	opt	stack 5
+  2004                           ; Regs used in _LCD_delay: [wreg]
+  2005                           	
+  2006  04D8                     l3536:	
+  2007  04D8  2CDA               	goto	l3538
+  2008                           	
+  2009  04D9                     l2073:	
+  2010  04D9  2CDA               	goto	l3538
+  2011                           	
+  2012  04DA                     l2072:	
+  2013                           	
+  2014  04DA                     l3538:	
+  2015  04DA  3001               	movlw	low(01h)
+  2016  04DB  02F0               	subwf	(LCD_delay@x),f
+  2017  04DC  3000               	movlw	high(01h)
+  2018  04DD  1C03               	skipc
+  2019  04DE  03F1               	decf	(LCD_delay@x+1),f
+  2020  04DF  02F1               	subwf	(LCD_delay@x+1),f
+  2021  04E0  30FF               	movlw	high(0FFFFh)
+  2022  04E1  0671               	xorwf	((LCD_delay@x+1)),w
+  2023  04E2  1D03               	skipz
+  2024  04E3  2CE6               	goto	u35
+  2025  04E4  30FF               	movlw	low(0FFFFh)
+  2026  04E5  0670               	xorwf	((LCD_delay@x)),w
+  2027  04E6                     u35:
+  2028                           
+  2029  04E6  1D03               	skipz
+  2030  04E7  2CE9               	goto	u31
+  2031  04E8  2CEA               	goto	u30
+  2032  04E9                     u31:
+  2033  04E9  2CDA               	goto	l3538
+  2034  04EA                     u30:
+  2035  04EA  2CEB               	goto	l2075
+  2036                           	
+  2037  04EB                     l2074:	
+  2038                           	
+  2039  04EB                     l2075:	
+  2040  04EB  0008               	return
+  2041                           	opt stack 0
+  2042                           GLOBAL	__end_of_LCD_delay
+  2043  04EC                     	__end_of_LCD_delay:
+  2044 ;; =============== function _LCD_delay ends ============
+  2045                           
+  2046                           	signat	_LCD_delay,4216
+  2047                           	global	_init
+  2048                           psect	text330,local,class=CODE,delta=2
+  2049                           global __ptext330
+  2050  04D2                     __ptext330:
+  2051                           
+  2052 ;; *************** function _init *****************
+  2053 ;; Defined at:
+  2054 ;;		line 19 in file "main.c"
+  2055 ;; Parameters:    Size  Location     Type
+  2056 ;;		None
+  2057 ;; Auto vars:     Size  Location     Type
+  2058 ;;		None
+  2059 ;; Return value:  Size  Location     Type
+  2060 ;;		None               void
+  2061 ;; Registers used:
+  2062 ;;		wreg, status,2
+  2063 ;; Tracked objects:
+  2064 ;;		On entry : 0/0
+  2065 ;;		On exit  : 0/0
+  2066 ;;		Unchanged: 0/0
+  2067 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  2068 ;;      Params:         0       0       0       0       0
+  2069 ;;      Locals:         0       0       0       0       0
+  2070 ;;      Temps:          0       0       0       0       0
+  2071 ;;      Totals:         0       0       0       0       0
+  2072 ;;Total ram usage:        0 bytes
+  2073 ;; Hardware stack levels used:    1
+  2074 ;; This function calls:
+  2075 ;;		Nothing
+  2076 ;; This function is called by:
+  2077 ;;		_main
+  2078 ;; This function uses a non-reentrant model
+  2079 ;;
+  2080                           psect	text330
+  2081                           	file	"main.c"
+  2082                           	line	19
+  2083                           	global	__size_of_init
+  2084  0006                     	__size_of_init	equ	__end_of_init-_init
+  2085                           	
+  2086  04D2                     _init:	
+  2087                           	opt	stack 7
+  2088                           ; Regs used in _init: [wreg+status,2]
+  2089                           	line	21
+  2090                           	
+  2091  04D2                     l3532:	
+  2092                           ;main.c: 21: TRISC = 0x10;
+  2093  04D2  3010               	movlw	(010h)
+  2094  04D3  1683               	bsf	status, 5	;RP0=1, select bank1
+  2095  04D4  1303               	bcf	status, 6	;RP1=0, select bank1
+  2096  04D5  0087               	movwf	(135)^080h	;volatile
+  2097                           	line	22
+  2098                           	
+  2099  04D6                     l3534:	
+  2100                           ;main.c: 22: TRISD = 0x00;
+  2101  04D6  0188               	clrf	(136)^080h	;volatile
+  2102                           	line	23
+  2103                           	
+  2104  04D7                     l1039:	
+  2105  04D7  0008               	return
+  2106                           	opt stack 0
+  2107                           GLOBAL	__end_of_init
+  2108  04D8                     	__end_of_init:
+  2109 ;; =============== function _init ends ============
+  2110                           
+  2111                           	signat	_init,88
+  2112                           	global	_delay
+  2113                           psect	text331,local,class=CODE,delta=2
+  2114                           global __ptext331
+  2115  0597                     __ptext331:
+  2116                           
+  2117 ;; *************** function _delay *****************
+  2118 ;; Defined at:
+  2119 ;;		line 17 in file "main.c"
+  2120 ;; Parameters:    Size  Location     Type
+  2121 ;;  x               4    0[COMMON] unsigned long 
+  2122 ;; Auto vars:     Size  Location     Type
+  2123 ;;		None
+  2124 ;; Return value:  Size  Location     Type
+  2125 ;;		None               void
+  2126 ;; Registers used:
+  2127 ;;		wreg
+  2128 ;; Tracked objects:
+  2129 ;;		On entry : 0/0
+  2130 ;;		On exit  : 0/0
+  2131 ;;		Unchanged: 0/0
+  2132 ;; Data sizes:     COMMON   BANK0   BANK1   BANK3   BANK2
+  2133 ;;      Params:         4       0       0       0       0
+  2134 ;;      Locals:         0       0       0       0       0
+  2135 ;;      Temps:          4       0       0       0       0
+  2136 ;;      Totals:         8       0       0       0       0
+  2137 ;;Total ram usage:        8 bytes
+  2138 ;; Hardware stack levels used:    1
+  2139 ;; This function calls:
+  2140 ;;		Nothing
+  2141 ;; This function is called by:
+  2142 ;;		_main
+  2143 ;; This function uses a non-reentrant model
+  2144 ;;
+  2145                           psect	text331
+  2146                           	file	"main.c"
+  2147                           	line	17
+  2148                           	global	__size_of_delay
+  2149  0032                     	__size_of_delay	equ	__end_of_delay-_delay
+  2150                           	
+  2151  0597                     _delay:	
+  2152                           	opt	stack 7
+  2153                           ; Regs used in _delay: [wreg]
+  2154                           	
+  2155  0597                     l3528:	
+  2156  0597  2D99               	goto	l3530
+  2157                           	
+  2158  0598                     l1034:	
+  2159  0598  2D99               	goto	l3530
+  2160                           	
+  2161  0599                     l1033:	
+  2162                           	
+  2163  0599                     l3530:	
+  2164  0599  3001               	movlw	01h
+  2165  059A  00F4               	movwf	((??_delay+0)+0)
+  2166  059B  3000               	movlw	0
+  2167  059C  00F5               	movwf	((??_delay+0)+0+1)
+  2168  059D  3000               	movlw	0
+  2169  059E  00F6               	movwf	((??_delay+0)+0+2)
+  2170  059F  3000               	movlw	0
+  2171  05A0  00F7               	movwf	((??_delay+0)+0+3)
+  2172  05A1  0874               	movf	0+(??_delay+0)+0,w
+  2173  05A2  02F0               	subwf	(delay@x),f
+  2174  05A3  0875               	movf	1+(??_delay+0)+0,w
+  2175  05A4  1C03               	skipc
+  2176  05A5  0F75               	incfsz	1+(??_delay+0)+0,w
+  2177  05A6  2DA8               	goto	u15
+  2178  05A7  2DA9               	goto	u16
+  2179  05A8                     u15:
+  2180  05A8  02F1               	subwf	(delay@x+1),f
+  2181  05A9                     u16:
+  2182  05A9  0876               	movf	2+(??_delay+0)+0,w
+  2183  05AA  1C03               	skipc
+  2184  05AB  0F76               	incfsz	2+(??_delay+0)+0,w
+  2185  05AC  2DAE               	goto	u17
+  2186  05AD  2DAF               	goto	u18
+  2187  05AE                     u17:
+  2188  05AE  02F2               	subwf	(delay@x+2),f
+  2189  05AF                     u18:
+  2190  05AF  0877               	movf	3+(??_delay+0)+0,w
+  2191  05B0  1C03               	skipc
+  2192  05B1  0F77               	incfsz	3+(??_delay+0)+0,w
+  2193  05B2  2DB4               	goto	u19
+  2194  05B3  2DB5               	goto	u10
+  2195  05B4                     u19:
+  2196  05B4  02F3               	subwf	(delay@x+3),f
+  2197  05B5                     u10:
+  2198                           
+  2199  05B5  30FF               	movlw	0FFh
+  2200  05B6  0673               	xorwf	((delay@x+3)),w
+  2201  05B7  1D03               	skipz
+  2202  05B8  2DC3               	goto	u25
+  2203  05B9  30FF               	movlw	0FFh
+  2204  05BA  0672               	xorwf	((delay@x+2)),w
+  2205  05BB  1D03               	skipz
+  2206  05BC  2DC3               	goto	u25
+  2207  05BD  30FF               	movlw	0FFh
+  2208  05BE  0671               	xorwf	((delay@x+1)),w
+  2209  05BF  1D03               	skipz
+  2210  05C0  2DC3               	goto	u25
+  2211  05C1  30FF               	movlw	0FFh
+  2212  05C2  0670               	xorwf	((delay@x)),w
+  2213  05C3                     u25:
+  2214  05C3  1D03               	skipz
+  2215  05C4  2DC6               	goto	u21
+  2216  05C5  2DC7               	goto	u20
+  2217  05C6                     u21:
+  2218  05C6  2D99               	goto	l3530
+  2219  05C7                     u20:
+  2220  05C7  2DC8               	goto	l1036
+  2221                           	
+  2222  05C8                     l1035:	
+  2223                           	
+  2224  05C8                     l1036:	
+  2225  05C8  0008               	return
+  2226                           	opt stack 0
+  2227                           GLOBAL	__end_of_delay
+  2228  05C9                     	__end_of_delay:
+  2229 ;; =============== function _delay ends ============
+  2230                           
+  2231                           	signat	_delay,4216
+  2232                           psect	text332,local,class=CODE,delta=2
+  2233                           global __ptext332
+  2234  0000                     __ptext332:
+  2235                           	global	btemp
+  2236  007E                     	btemp set 07Eh
+  2237                           
+  2238                           	DABS	1,126,2	;btemp
+  2239                           	global	wtemp0
+  2240  007E                     	wtemp0 set btemp
+
+
+HI-TECH Software PICC Macro Assembler V9.81 build 7503 
+Symbol Table                                                                                   Sun May 01 01:22:36 2016
+
+                   u10 05B5                     u20 05C7                     u21 05C6                     u30 04EA  
+                   u15 05A8                     u31 04E9                     u16 05A9                     u25 05C3  
+                   u17 05AE                     u18 05AF                     u19 05B4                     u35 04E6  
+                   u60 04FE                     u61 04FD                     u65 04FA            ?_LCD_enable 0070  
+                  _RC2 003A                    _RC3 003B                    _RC4 003C                    _RC5 003D  
+                  _RD4 0044                    _RC6 003E                    _RD5 0045                   l1033 0599  
+                 l1034 0598                   l1042 07D2                   l1035 05C8                   l1043 07FC  
+                 l1036 05C8                   l1044 07FD                   l1045 07FD                   l1039 04D7  
+                 l2072 04DA                   l3120 04FF                   l2073 04D9                   l3121 04FF  
+                 l2081 0596                   l2074 04EB                   l2075 04EB                   l3131 06DD  
+                 l3124 0645                   l3132 0724                   l2084 056B                   l3125 0681  
+                 l3133 06F1                   l3118 04EE                   l2078 0518                   l3126 0663  
+                 l3134 06F5                   l3150 0730                   l3119 04ED                   l3127 0663  
+                 l3135 0724                   l3151 072F                   l3128 0683                   l3144 063B  
+                 l3152 0735                   l3153 0782                   l3138 0540                   l3154 0781  
+                 l3147 0600                   l3155 078C                   l3156 078F                   l3159 06CE  
+                 l4400 054C                   l3530 0599                   l4402 0558                   l4410 0534  
+                 l3532 04D2                   l4332 0500                   l4340 063D                   l4404 055D  
+                 l4420 063B                   l4412 0601                   l3534 04D6                   l3550 04EC  
+                 l4334 0503                   l4350 065D                   l4342 0644                   l4406 0519  
+                 l4414 0604                   l4422 05CA                   l4430 0726                   l3528 0597  
+                 l3536 04D8                   l3552 04EE                   l4336 050C                   l4360 0683  
+                 l4352 0664                   l4344 0648                   l4408 051C                   l4416 062D  
+                 l4424 05CD                   l4440 0782                   l4432 0729                   l3538 04DA  
+                 l4354 0676                   l4346 0651                   l4338 063C                   l4370 06E9  
+                 l4362 06D0                   l4418 0639                   l4426 05F4                   l4434 0730  
+                 l4356 067A                   l4348 0657                   l4380 0707                   l4372 06ED  
+                 l4364 06D4                   l4428 056C                   l4436 073B                   l4444 0790  
+                 l4358 0681                   l4382 0710                   l4374 06F5                   l4366 06DC  
+                 l4390 0688                   l4438 0774                   l4384 0719                   l4376 06FB  
+                 l4368 06E0                   l4392 06C0                   l4386 071D                   l4378 0704  
+                 l4394 06CC                   l4396 06CE                   l4388 0685                   l4398 0542  
+__size_of_Write_Enable 0028                   u2200 0643                   u2201 0642                   u2210 065D  
+                 u2211 065C                   u2220 0680                   u2221 067F                   u2230 06DB  
+                 u2231 06DA                   u2240 06ED                   u2241 06EC                   u2250 0723  
+                 u2251 0722                   u2260 0549                   u2261 0545                   u2274 054C  
+                 u2290 078C                   u2291 078B                   u2285 054F                   _main 0790  
+                 _init 04D2  __size_of_Write_Status 0038                   btemp 007E                   start 0000  
+   __size_of_LCD_delay 0014            Read_8Bits@i 0074          ??_Read_Status 0077       __end_of_LCD_func 056C  
+     __end_of_LCD_init 0597                  ?_main 0020                  ?_init 0070                  _PORTD 0008  
+         _Write_Enable 0519                  _TRISC 0087                  _TRISD 0088           _Write_Status 05C9  
+                _delay 0597                  status 0003                  wtemp0 007E     __size_of_SPI_delay 0014  
+  __size_of_LCD_enable 0019             _Read_8Bits 063C            LCD_func@cmd 007A           __end_of_main 0800  
+         __end_of_init 04D8                 ??_main 007D                 ??_init 0070      __end_of_LCD_delay 04EC  
+           _Send_8Bits 06CF    __end_of_Read_Status 063C        Read_Status@temp 0078                 ?_delay 0070  
+   __size_of_Read_Byte 004B                 delay@x 0070            Send_8Bits@i 0076      __end_of_SPI_delay 0500  
+            ?_LCD_func 007A              ?_LCD_init 0070           LCD_func@data 007C            ?_Read_8Bits 0070  
+       __pcstackCOMMON 0070          __end_of_delay 05C9             _Write_Byte 0725            _Read_Status 0601  
+         ??_LCD_enable 0072      __end_of_Read_Byte 06CF            ?_Send_8Bits 0070                ??_delay 0074  
+       Write_Byte@data 007B             ??_LCD_func 007B             ??_LCD_init 007D     __end_of_LCD_enable 0519  
+           __pmaintext 0790    __size_of_Read_8Bits 0048    __size_of_Send_8Bits 0056            ?_Write_Byte 0079  
+            _LCD_delay 04D8   end_of_initialization 04CE      Write_Byte@address 0079       Write_Status@data 0077  
+        Read_Byte@temp 0079              _SPI_delay 04EC             ?_LCD_delay 0070    __size_of_Write_Byte 006B  
+         ??_Read_8Bits 0072      __size_of_LCD_func 002B      __size_of_LCD_init 002B           ?_Read_Status 0070  
+           LCD_delay@x 0070    start_initialization 04CE           ??_Send_8Bits 0072              _Read_Byte 0684  
+   __end_of_Read_8Bits 0684             ?_SPI_delay 0070     __end_of_Send_8Bits 0725          ?_Write_Enable 0070  
+        __pcstackBANK0 0020          ?_Write_Status 0070             ?_Read_Byte 0070            ??_LCD_delay 0072  
+       Read_8Bits@temp 0075           ??_Write_Byte 007A              __ptext320 05C9              __ptext321 0601  
+            __ptext330 04D2              __ptext322 0519              __ptext331 0597              __ptext323 0541  
+            __ptext332 0000              __ptext324 0684              __ptext325 06CF              __ptext317 0000  
+            __ptext326 063C              __ptext318 0725              __ptext327 0500              __ptext319 056C  
+            __ptext328 04EC              __ptext329 04D8         ??_Write_Enable 0077         ??_Write_Status 0077  
+          ??_SPI_delay 0072         __size_of_delay 0032     __end_of_Write_Byte 0790               _LCD_func 0541  
+             _LCD_init 056C   __size_of_Read_Status 003B            ??_Read_Byte 0077         Send_8Bits@data 0074  
+       Send_8Bits@temp 0075             SPI_delay@x 0070       Read_Byte@address 0078          __size_of_main 0070  
+        __size_of_init 0006   __end_of_Write_Enable 0541   __end_of_Write_Status 0601               main@argc 0020  
+             main@argv 0022             _LCD_enable 0500  

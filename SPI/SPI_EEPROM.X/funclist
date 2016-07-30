@@ -1,0 +1,16 @@
+_init: CODE, 1234 0 6
+_delay: CODE, 1431 0 50
+_Write_Status: CODE, 1481 0 56
+_Read_Byte: CODE, 1668 0 75
+_SPI_delay: CODE, 1260 0 20
+_main: CODE, 1936 0 112
+_LCD_enable: CODE, 1280 0 25
+_Write_Byte: CODE, 1829 0 107
+_Send_8Bits: CODE, 1743 0 86
+_Write_Enable: CODE, 1305 0 40
+_LCD_init: CODE, 1388 0 43
+_Read_Status: CODE, 1537 0 59
+_LCD_delay: CODE, 1240 0 20
+_LCD_func: CODE, 1345 0 43
+_Read_8Bits: CODE, 1596 0 72
+Total: 814

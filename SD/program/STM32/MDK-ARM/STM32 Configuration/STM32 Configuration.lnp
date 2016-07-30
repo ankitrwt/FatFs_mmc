@@ -1,0 +1,23 @@
+--cpu Cortex-M0
+"stm32 configuration\stm32f0xx_hal_pwr.o"
+"stm32 configuration\stm32f0xx_hal_flash.o"
+"stm32 configuration\stm32f0xx_hal_pwr_ex.o"
+"stm32 configuration\stm32f0xx_hal_gpio.o"
+"stm32 configuration\stm32f0xx_hal_cortex.o"
+"stm32 configuration\stm32f0xx_hal_rcc.o"
+"stm32 configuration\stm32f0xx_hal_dma.o"
+"stm32 configuration\stm32f0xx_hal_rcc_ex.o"
+"stm32 configuration\stm32f0xx_hal.o"
+"stm32 configuration\stm32f0xx_hal_flash_ex.o"
+"stm32 configuration\startup_stm32f030x8.o"
+"stm32 configuration\sdmm_1.o"
+"stm32 configuration\system_stm32f0xx.o"
+"stm32 configuration\stm32f0xx_hal_msp_1.o"
+"stm32 configuration\main_1.o"
+"stm32 configuration\stm32f0xx_it.o"
+"stm32 configuration\sdmm_1.o"
+"stm32 configuration\ff.o"
+--library_type=microlib --strict --scatter "STM32 Configuration\STM32 Configuration.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "STM32 Configuration.map" -o "STM32 Configuration\STM32 Configuration.axf"

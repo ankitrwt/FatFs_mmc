@@ -1,0 +1,13 @@
+_init: CODE, 907 0 6
+_SPI_delay: CODE, 958 0 20
+_main: CODE, 1385 0 114
+_LCD_enable: CODE, 998 0 25
+_SD_init: CODE, 1766 0 282
+_LCD_string: CODE, 1136 0 45
+_LCD_init: CODE, 1093 0 43
+_LCD_delay: CODE, 938 0 20
+_SD_sendCommand: CODE, 1499 0 267
+_SPI_Read_8Bits: CODE, 1181 0 95
+_LCD_func: CODE, 1050 0 43
+_SPI_Send_8Bits: CODE, 1276 0 109
+Total: 1069

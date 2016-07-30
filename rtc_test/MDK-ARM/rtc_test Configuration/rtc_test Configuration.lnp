@@ -1,0 +1,22 @@
+--cpu Cortex-M0
+"rtc_test configuration\stm32f0xx_hal_rcc_ex.o"
+"rtc_test configuration\stm32f0xx_hal_flash.o"
+"rtc_test configuration\stm32f0xx_hal_rtc_ex.o"
+"rtc_test configuration\stm32f0xx_hal_dma.o"
+"rtc_test configuration\stm32f0xx_hal.o"
+"rtc_test configuration\stm32f0xx_hal_cortex.o"
+"rtc_test configuration\stm32f0xx_hal_rcc.o"
+"rtc_test configuration\stm32f0xx_hal_gpio.o"
+"rtc_test configuration\stm32f0xx_hal_rtc.o"
+"rtc_test configuration\stm32f0xx_hal_flash_ex.o"
+"rtc_test configuration\stm32f0xx_hal_pwr.o"
+"rtc_test configuration\stm32f0xx_hal_pwr_ex.o"
+"rtc_test configuration\startup_stm32f030x8.o"
+"rtc_test configuration\stm32f0xx_it.o"
+"rtc_test configuration\main.o"
+"rtc_test configuration\stm32f0xx_hal_msp.o"
+"rtc_test configuration\system_stm32f0xx.o"
+--library_type=microlib --strict --scatter "rtc_test Configuration\rtc_test Configuration.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "rtc_test Configuration.map" -o "rtc_test Configuration\rtc_test Configuration.axf"

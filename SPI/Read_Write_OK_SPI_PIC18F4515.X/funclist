@@ -1,0 +1,25 @@
+_xmit_mmc: CODE, 5568 0 174
+_init: CODE, 6898 0 14
+_rcvr_datablock: CODE, 6186 0 128
+_LCD_cur: CODE, 6824 0 22
+_rcvr_mmc: CODE, 6056 0 130
+__stringdata: SMALLCONST, 4097 0 115
+_send_cmd: CODE, 5742 0 168
+_disk_initialize: CODE, 4214 0 494
+_disk_write: CODE, 5104 0 270
+_disk_status: CODE, 6882 0 16
+_main: CODE, 4708 0 396
+_delaymain: CODE, 6716 0 30
+_deselect: CODE, 6800 0 24
+_LCD_enable: CODE, 6746 0 30
+__initialization: CODE, 6478 0 64
+_dly_us: CODE, 6776 0 24
+_LCD_string: CODE, 6666 0 50
+_LCD_init: CODE, 6548 0 62
+_disk_read: CODE, 5374 0 194
+_LCD_delay: CODE, 6846 0 18
+_select: CODE, 6610 0 56
+_LCD_func: CODE, 6314 0 86
+_xmit_datablock: CODE, 5910 0 146
+_wait_ready: CODE, 6400 0 78
+Total: 2789

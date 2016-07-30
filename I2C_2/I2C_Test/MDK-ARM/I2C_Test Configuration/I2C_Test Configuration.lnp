@@ -1,0 +1,21 @@
+--cpu Cortex-M0
+"i2c_test configuration\startup_stm32f030x8.o"
+"i2c_test configuration\i2c.o"
+"i2c_test configuration\stm32f0xx_hal_flash.o"
+"i2c_test configuration\stm32f0xx_hal_flash_ex.o"
+"i2c_test configuration\stm32f0xx_hal.o"
+"i2c_test configuration\stm32f0xx_hal_pwr.o"
+"i2c_test configuration\stm32f0xx_hal_gpio.o"
+"i2c_test configuration\stm32f0xx_hal_pwr_ex.o"
+"i2c_test configuration\stm32f0xx_hal_cortex.o"
+"i2c_test configuration\stm32f0xx_hal_dma.o"
+"i2c_test configuration\stm32f0xx_hal_rcc_ex.o"
+"i2c_test configuration\stm32f0xx_hal_rcc.o"
+"i2c_test configuration\system_stm32f0xx.o"
+"i2c_test configuration\stm32f0xx_hal_msp.o"
+"i2c_test configuration\stm32f0xx_it.o"
+"i2c_test configuration\main.o"
+--library_type=microlib --strict --scatter "I2C_Test Configuration\I2C_Test Configuration.sct"
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "I2C_Test Configuration.map" -o "I2C_Test Configuration\I2C_Test Configuration.axf"

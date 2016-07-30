@@ -1,0 +1,11 @@
+_init: CODE, 1880 0 10
+_delay: CODE, 1772 0 36
+__stringdata: SMALLCONST, 1537 0 6
+_main: CODE, 1728 0 44
+_LCD_enable: CODE, 1808 0 34
+__initialization: CODE, 1866 0 0
+_LCD_string: CODE, 1672 0 56
+_LCD_init: CODE, 1544 0 66
+_LCD_delay: CODE, 1842 0 24
+_LCD_func: CODE, 1610 0 62
+Total: 338

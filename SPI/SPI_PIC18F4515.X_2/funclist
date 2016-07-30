@@ -1,0 +1,25 @@
+_init: CODE, 44918 0 14
+_strcpy: CODE, 45070 0 48
+_delay: CODE, 45040 0 30
+_LCD_cur: CODE, 44988 0 22
+__stringdata: MEDIUMCONST, 48619 0 531
+_SD_writeSingleBlock: CODE, 46176 0 160
+_SPI_delay: CODE, 44950 0 18
+_getBootSectorData: CODE, 47750 0 868
+_getSetFreeCluster: CODE, 46336 0 314
+_SD_erase: CODE, 45916 0 130
+_main: CODE, 46984 0 766
+_SD_readSingleBlock: CODE, 45674 0 114
+_LCD_enable: CODE, 45010 0 30
+_SD_init: CODE, 46650 0 334
+___lmul: CODE, 45498 0 86
+__initialization: CODE, 45252 0 64
+_LCD_string: CODE, 45412 0 86
+_LCD_init: CODE, 45118 0 62
+___lldiv: CODE, 46046 0 130
+_LCD_delay: CODE, 44932 0 18
+_SD_sendCommand: CODE, 45788 0 128
+_SPI_Read_8Bits: CODE, 45180 0 72
+_LCD_func: CODE, 45326 0 86
+_SPI_Send_8Bits: CODE, 45584 0 90
+Total: 4201
